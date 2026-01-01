@@ -1,0 +1,142 @@
+<!-- investment-add.component.html -->
+<div class="add-investment-container">
+  
+  <!-- 顶部导航 -->
+  <div class="top-bar">
+    <button class="back-button" (click)="onCancel()">
+      <span class="back-icon">←</span>
+    </button>
+    <h1 class="page-title">Add Investment</h1>
+    <div class="spacer"></div>
+  </div>
+
+  <!-- 表单 -->
+  <form [formGroup]="investmentForm" (ngSubmit)="onSubmit()" class="investment-form">
+    
+    <!-- 投资类型选择 -->
+    <div class="form-group">
+      <label class="form-label">Investment Type</label>
+      <div class="type-selector">
+        <button
+          *ngFor="let type of investmentTypes"
+          type="button"
+          class="type-option"
+          [class.active]="investmentForm.get('investmentType')?.value === type.value"
+          (click)="investmentForm.patchValue({ investmentType: type.value })">
+          {{ type.label }}
+        </button>
+      </div>
+    </div>
+
+    <!-- 股票代码 -->
+    <div class="form-group">
+      <label class="form-label">Stock Symbol *</label>
+      <div class="symbol-input-wrapper">
+        <input 
+          type="text" 
+          formControlName="stockSymbol"
+          class="form-input symbol-input"
+          placeholder="e.g., AAPL, GOOGL"
+          (blur)="checkSymbol()"
+          [class.error]="hasError('stockSymbol')">
+        <button 
+          type="button" 
+          class="check-button"
+          (click)="checkSymbol()"
+          [disabled]="isCheckingSymbol">
+          <span *ngIf="!isCheckingSymbol">🔍</span>
+          <span *ngIf="isCheckingSymbol" class="spinner-small"></span>
+        </button>
+      </div>
+      <small class="form-hint">Enter the ticker symbol (will be converted to uppercase)</small>
+      <div class="error-message" *ngIf="hasError('stockSymbol')">
+        {{ getErrorMessage('stockSymbol') }}
+      </div>
+    </div>
+
+    <!-- 股票名称（可选） -->
+    <div class="form-group">
+      <label class="form-label">Stock Name (Optional)</label>
+      <input 
+        type="text" 
+        formControlName="stockName"
+        class="form-input"
+        placeholder="e.g., Apple Inc.">
+    </div>
+
+    <!-- 持有股数 -->
+    <div class="form-group">
+      <label class="form-label">Total Shares *</label>
+      <input 
+        type="number" 
+        formControlName="totalShares"
+        class="form-input"
+        placeholder="0"
+        step="0.0001"
+        min="0"
+        [class.error]="hasError('totalShares')">
+      <div class="error-message" *ngIf="hasError('totalShares')">
+        {{ getErrorMessage('totalShares') }}
+      </div>
+    </div>
+
+    <!-- 平均成本 -->
+    <div class="form-group">
+      <label class="form-label">Average Cost per Share *</label>
+      <div class="currency-input-wrapper">
+        <span class="currency-symbol">$</span>
+        <input 
+          type="number" 
+          formControlName="averageCost"
+          class="form-input with-currency"
+          placeholder="0.00"
+          step="0.01"
+          min="0"
+          [class.error]="hasError('averageCost')">
+      </div>
+      <div class="error-message" *ngIf="hasError('averageCost')">
+        {{ getErrorMessage('averageCost') }}
+      </div>
+    </div>
+
+    <!-- 总投资金额（计算显示） -->
+    <div class="total-invested-card" *ngIf="getTotalInvested() > 0">
+      <div class="card-header">
+        <span class="label">Total Invested</span>
+      </div>
+      <div class="card-value">
+        ${{ getTotalInvested().toFixed(2) }}
+      </div>
+      <small class="card-hint">
+        {{ investmentForm.get('totalShares')?.value }} shares × 
+        ${{ investmentForm.get('averageCost')?.value }}
+      </small>
+    </div>
+
+    <!-- 错误提示 -->
+    <div class="error-banner" *ngIf="errorMessage">
+      <span class="error-icon">⚠️</span>
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <!-- 提交按钮 -->
+    <div class="button-group">
+      <button 
+        type="button" 
+        class="btn btn-secondary"
+        (click)="onCancel()"
+        [disabled]="isSubmitting">
+        Cancel
+      </button>
+      <button 
+        type="submit" 
+        class="btn btn-primary"
+        [disabled]="isSubmitting || investmentForm.invalid">
+        <span *ngIf="!isSubmitting">Add Investment</span>
+        <span *ngIf="isSubmitting">Adding...</span>
+      </button>
+    </div>
+
+  </form>
+
+</div>

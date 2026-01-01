@@ -1,0 +1,34 @@
+<!-- investments.component.html - 合并 Portfolio + Net Worth -->
+<div class="investments-container">
+  
+  <!-- Tab Header -->
+  <div class="tab-header">
+    <button 
+      class="tab-button"
+      [class.active]="activeTab === 'portfolio'"
+      (click)="switchTab('portfolio')">
+      <span class="icon">📈</span>
+      <span>Portfolio</span>
+    </button>
+    <button 
+      class="tab-button"
+      [class.active]="activeTab === 'networth'"
+      (click)="switchTab('networth')">
+      <span class="icon">💰</span>
+      <span>Net Worth</span>
+    </button>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="tab-content">
+    <!-- Portfolio Tab -->
+    <div *ngIf="activeTab === 'portfolio'" class="portfolio-view">
+      <app-portfolio></app-portfolio>
+    </div>
+
+    <!-- Net Worth Tab -->
+    <div *ngIf="activeTab === 'networth'" class="networth-view">
+      <app-networth></app-networth>
+    </div>
+  </div>
+</div>

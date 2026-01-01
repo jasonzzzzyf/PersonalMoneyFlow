@@ -1,0 +1,172 @@
+<!-- transaction-add.component.html - 修复版 -->
+<div class="add-transaction-container">
+  
+  <!-- 顶部导航 -->
+  <div class="top-bar">
+    <button class="back-button" (click)="onCancel()">
+      <span class="back-icon">←</span>
+    </button>
+    <h1 class="page-title">Add Transaction</h1>
+    <div class="spacer"></div>
+  </div>
+
+  <!-- 成功提示 -->
+  <div class="success-banner" *ngIf="successMessage">
+    <span class="success-icon">✅</span>
+    <span>{{ successMessage }}</span>
+  </div>
+
+  <!-- 交易类型切换 -->
+  <div class="type-switcher">
+    <button 
+      class="type-button" 
+      [class.active]="selectedType === 'INCOME'"
+      (click)="switchType('INCOME')">
+      <span class="type-icon">📈</span>
+      <span class="type-text">Income</span>
+    </button>
+    <button 
+      class="type-button" 
+      [class.active]="selectedType === 'EXPENSE'"
+      (click)="switchType('EXPENSE')">
+      <span class="type-icon">📉</span>
+      <span class="type-text">Expense</span>
+    </button>
+  </div>
+
+  <!-- 表单 -->
+  <form [formGroup]="transactionForm" (ngSubmit)="onSubmit()" class="transaction-form">
+    
+    <!-- 金额输入（大字号） -->
+    <div class="amount-section">
+      <div class="currency-symbol">$</div>
+      <input 
+        type="number" 
+        formControlName="amount"
+        class="amount-input"
+        placeholder="0.00"
+        step="0.01"
+        min="0"
+        [class.error]="hasError('amount')">
+    </div>
+    <div class="error-message" *ngIf="hasError('amount')">
+      {{ getErrorMessage('amount') }}
+    </div>
+
+    <!-- 分类选择 -->
+    <div class="form-group">
+      <label class="form-label">Category</label>
+      <select 
+        formControlName="categoryId" 
+        class="form-select"
+        [class.error]="hasError('categoryId')">
+        <option value="">Select a category</option>
+        <option *ngFor="let category of filteredCategories" [value]="category.id">
+          {{ category.categoryName }}
+        </option>
+      </select>
+      <small class="form-hint" *ngIf="filteredCategories.length === 0 && categories.length > 0">
+        No {{ selectedType }} categories available. Switch to {{ selectedType === 'INCOME' ? 'EXPENSE' : 'INCOME' }}.
+      </small>
+      <div class="error-message" *ngIf="hasError('categoryId')">
+        {{ getErrorMessage('categoryId') }}
+      </div>
+    </div>
+
+    <!-- 日期选择 -->
+    <div class="form-group">
+      <label class="form-label">Date</label>
+      <input 
+        type="date" 
+        formControlName="transactionDate"
+        class="form-input"
+        [class.error]="hasError('transactionDate')">
+      <div class="error-message" *ngIf="hasError('transactionDate')">
+        {{ getErrorMessage('transactionDate') }}
+      </div>
+    </div>
+
+    <!-- 描述 -->
+    <div class="form-group">
+      <label class="form-label">Description (Optional)</label>
+      <input 
+        type="text" 
+        formControlName="description"
+        class="form-input"
+        placeholder="e.g., Lunch at Tim Hortons"
+        maxlength="500">
+    </div>
+
+    <!-- 备注（可折叠） -->
+    <details class="expandable-section">
+      <summary class="section-title">Additional Details</summary>
+      
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea 
+          formControlName="notes"
+          class="form-textarea"
+          placeholder="Add any additional notes..."
+          rows="3"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Tags</label>
+        <input 
+          type="text" 
+          formControlName="tags"
+          class="form-input"
+          placeholder="e.g., food, work, team">
+        <small class="form-hint">Separate tags with commas</small>
+      </div>
+
+      <!-- 循环交易 -->
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input 
+            type="checkbox" 
+            formControlName="isRecurring"
+            class="form-checkbox">
+          <span>Recurring Transaction</span>
+        </label>
+      </div>
+
+      <div class="form-group" *ngIf="transactionForm.get('isRecurring')?.value">
+        <label class="form-label">Frequency</label>
+        <select formControlName="recurringFrequency" class="form-select">
+          <option value="">Select frequency</option>
+          <option value="DAILY">Daily</option>
+          <option value="WEEKLY">Weekly</option>
+          <option value="MONTHLY">Monthly</option>
+          <option value="YEARLY">Yearly</option>
+        </select>
+      </div>
+    </details>
+
+    <!-- 错误提示 -->
+    <div class="error-banner" *ngIf="errorMessage">
+      <span class="error-icon">⚠️</span>
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <!-- 提交按钮 -->
+    <div class="button-group">
+      <button 
+        type="button" 
+        class="btn btn-secondary"
+        (click)="onCancel()"
+        [disabled]="isSubmitting">
+        Cancel
+      </button>
+      <button 
+        type="submit" 
+        class="btn btn-primary"
+        [disabled]="isSubmitting || transactionForm.invalid">
+        <span *ngIf="!isSubmitting">Save Transaction</span>
+        <span *ngIf="isSubmitting">Saving...</span>
+      </button>
+    </div>
+
+  </form>
+
+</div>

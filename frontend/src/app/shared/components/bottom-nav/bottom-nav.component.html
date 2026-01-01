@@ -1,0 +1,46 @@
+<!-- bottom-nav.component.html - 5个Tab设计 -->
+
+<nav class="bottom-nav">
+  <!-- Details (明细) -->
+  <button
+    class="nav-item"
+    [class.active]="isActive('details')"
+    (click)="navigateTo('/transactions')">
+    <span class="icon">📋</span>
+    <span class="label">Details</span>
+  </button>
+
+  <!-- Charts (图表) -->
+  <button
+    class="nav-item"
+    [class.active]="isActive('charts')"
+    (click)="navigateTo('/analytics')">
+    <span class="icon">📊</span>
+    <span class="label">Charts</span>
+  </button>
+
+  <!-- Add Button (Center) -->
+  <button
+    class="nav-item add-button"
+    (click)="openAddTransaction()">
+    <span class="icon add-icon">+</span>
+  </button>
+
+  <!-- Invest (投资 = Portfolio + Net Worth) -->
+  <button
+    class="nav-item"
+    [class.active]="isActive('invest')"
+    (click)="navigateTo('/investments')">
+    <span class="icon">💎</span>
+    <span class="label">Invest</span>
+  </button>
+
+  <!-- Profile (我的) -->
+  <button
+    class="nav-item"
+    [class.active]="isActive('profile')"
+    (click)="navigateTo('/profile')">
+    <span class="icon">👤</span>
+    <span class="label">Profile</span>
+  </button>
+</nav>

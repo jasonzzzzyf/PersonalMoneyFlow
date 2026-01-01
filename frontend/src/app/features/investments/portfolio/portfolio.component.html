@@ -1,0 +1,148 @@
+<div class="portfolio-container">
+  <!-- Header -->
+  <div class="portfolio-header">
+    <h1>📈 Investment Portfolio</h1>
+    <div class="header-actions">
+      <button class="btn-refresh" (click)="refreshPrices()" [disabled]="refreshing">
+        <span class="material-icons" [class.spinning]="refreshing">refresh</span>
+        {{ refreshing ? 'Refreshing...' : 'Refresh Prices' }}
+      </button>
+      <button class="btn-add" (click)="openAddDialog()">
+        + Add Investment
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Loading portfolio...</p>
+  </div>
+
+  <!-- Portfolio Summary -->
+  <div class="portfolio-summary" *ngIf="!loading && portfolio">
+    <div class="summary-card total">
+      <div class="card-header">
+        <span class="label">Total Portfolio Value</span>
+        <span class="material-icons">account_balance_wallet</span>
+      </div>
+      <div class="card-value">${{ portfolio.currentValue.toFixed(2) }}</div>
+      <div class="card-subtext">
+        Total Invested: ${{ portfolio.totalInvested.toFixed(2) }}
+      </div>
+    </div>
+
+    <div class="summary-card profit-loss" [class]="getProfitLossClass(portfolio.totalProfitLoss)">
+      <div class="card-header">
+        <span class="label">Total P&L</span>
+        <span class="material-icons">
+          {{ portfolio.totalProfitLoss >= 0 ? 'trending_up' : 'trending_down' }}
+        </span>
+      </div>
+      <div class="card-value">
+        {{ portfolio.totalProfitLoss >= 0 ? '+' : '' }}${{ portfolio.totalProfitLoss.toFixed(2) }}
+      </div>
+      <div class="card-subtext">
+        {{ portfolio.totalProfitLoss >= 0 ? '+' : '' }}{{ portfolio.profitLossPercent.toFixed(2) }}%
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!loading && portfolio && portfolio.investments.length === 0">
+    <div class="empty-icon">📊</div>
+    <h3>No Investments Yet</h3>
+    <p>Start building your portfolio by adding your first investment</p>
+    <button class="btn-add-large" (click)="openAddDialog()">
+      + Add Your First Investment
+    </button>
+  </div>
+
+  <!-- Investments List -->
+  <div class="investments-list" *ngIf="!loading && portfolio && portfolio.investments.length > 0">
+    <h2>Your Stocks & ETFs</h2>
+
+    <div class="investment-card" *ngFor="let investment of portfolio.investments">
+      <div class="investment-header">
+        <div class="symbol-info">
+          <h3>{{ investment.stockSymbol }}</h3>
+          <p>{{ investment.stockName }}</p>
+        </div>
+        <div class="current-price">
+          <span class="label">Current Price</span>
+          <span class="price">${{ investment.currentPrice?.toFixed(2) }}</span>
+        </div>
+      </div>
+
+      <div class="investment-stats">
+        <div class="stat">
+          <span class="label">Shares</span>
+          <span class="value">{{ investment.totalShares }}</span>
+        </div>
+        <div class="stat">
+          <span class="label">Avg Cost</span>
+          <span class="value">${{ investment.averageCost.toFixed(2) }}</span>
+        </div>
+        <div class="stat">
+          <span class="label">Total Invested</span>
+          <span class="value">${{ investment.totalInvested.toFixed(2) }}</span>
+        </div>
+        <div class="stat">
+          <span class="label">Current Value</span>
+          <span class="value">${{ investment.currentValue?.toFixed(2) }}</span>
+        </div>
+      </div>
+
+      <div class="investment-profit" [class]="getProfitLossClass(investment.profitLoss || 0)">
+        <div class="profit-amount">
+          <span class="label">P&L:</span>
+          <span class="value">
+            {{ (investment.profitLoss || 0) >= 0 ? '+' : '' }}${{ investment.profitLoss?.toFixed(2) }}
+          </span>
+        </div>
+        <div class="profit-percent">
+          {{ (investment.profitLoss || 0) >= 0 ? '+' : '' }}{{ investment.profitLossPercent?.toFixed(2) }}%
+        </div>
+      </div>
+
+      <div class="investment-actions">
+        <button class="btn-action buy" (click)="openBuyDialog(investment)">
+          <span class="material-icons">add_shopping_cart</span>
+          Buy
+        </button>
+        <button class="btn-action sell" (click)="openSellDialog(investment)" [disabled]="investment.totalShares === 0">
+          <span class="material-icons">sell</span>
+          Sell
+        </button>
+        <button class="btn-action delete" (click)="deleteInvestment(investment)">
+          <span class="material-icons">delete</span>
+          Delete
+        </button>
+      </div>
+
+      <div class="last-updated" *ngIf="investment.lastUpdated">
+        Last updated: {{ investment.lastUpdated | date: 'short' }}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Investment Dialog -->
+<div class="modal-overlay" *ngIf="showAddDialog" (click)="closeAddDialog()"></div>
+<div class="modal-content" *ngIf="showAddDialog" (click)="$event.stopPropagation()">
+  <app-add-investment-dialog
+    (added)="onInvestmentAdded()"
+    (cancelled)="closeAddDialog()"
+  ></app-add-investment-dialog>
+</div>
+
+<!-- Buy/Sell Transaction Dialog -->
+<div class="modal-overlay" *ngIf="showTransactionDialog" (click)="closeTransactionDialog()"></div>
+<div class="modal-content" *ngIf="showTransactionDialog" (click)="$event.stopPropagation()">
+  <app-transaction-dialog
+    [investment]="selectedInvestment!"
+    [transactionType]="transactionType"
+    (completed)="onTransactionCompleted()"
+    (cancelled)="closeTransactionDialog()"
+  ></app-transaction-dialog>
+</div>

@@ -1,0 +1,12 @@
+/* app.component.scss */
+
+.app-container {
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+/* 全局样式 */
+:host {
+  display: block;
+  min-height: 100vh;
+}

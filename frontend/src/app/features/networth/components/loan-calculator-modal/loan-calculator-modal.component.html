@@ -1,0 +1,119 @@
+<!-- loan-calculator-modal.component.html -->
+
+<div class="modal-overlay" (click)="closeModal()">
+  <div class="modal-content calculator" (click)="$event.stopPropagation()">
+    
+    <div class="modal-header">
+      <h2>🧮 Loan Calculator</h2>
+      <button class="close-btn" (click)="closeModal()">✕</button>
+    </div>
+
+    <div class="calculator-content">
+      
+      <!-- Input Form -->
+      <div class="calculator-inputs">
+        <h3>Loan Details</h3>
+        
+        <form [formGroup]="calculatorForm">
+          
+          <div class="form-group">
+            <label>Principal Amount ($)</label>
+            <input 
+              type="number" 
+              formControlName="principal"
+              class="form-control"
+              placeholder="300,000"
+              step="1000">
+          </div>
+
+          <div class="form-group">
+            <label>Interest Rate (% per year)</label>
+            <input 
+              type="number" 
+              formControlName="interestRate"
+              class="form-control"
+              placeholder="3.5"
+              step="0.1">
+          </div>
+
+          <div class="form-group">
+            <label>Loan Term (years)</label>
+            <input 
+              type="number" 
+              formControlName="termYears"
+              class="form-control"
+              placeholder="25"
+              step="1">
+          </div>
+
+          <div class="form-group">
+            <label>Start Date</label>
+            <input 
+              type="date" 
+              formControlName="startDate"
+              class="form-control">
+          </div>
+
+          <div class="button-group">
+            <button 
+              type="button" 
+              class="btn btn-calculate"
+              (click)="calculate()"
+              [disabled]="!calculatorForm.valid">
+              Calculate
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-reset"
+              (click)="reset()">
+              Reset
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- Results -->
+      <div class="calculator-results" *ngIf="result">
+        <h3>Results</h3>
+        
+        <div class="result-card primary">
+          <div class="result-label">Monthly Payment</div>
+          <div class="result-value">${{ result.monthlyPayment.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</div>
+        </div>
+
+        <div class="result-grid">
+          
+          <div class="result-card">
+            <div class="result-label">Total Payment</div>
+            <div class="result-value">${{ result.totalPayment.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</div>
+          </div>
+
+          <div class="result-card">
+            <div class="result-label">Total Interest</div>
+            <div class="result-value danger">${{ result.totalInterest.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</div>
+          </div>
+
+          <div class="result-card">
+            <div class="result-label">Payoff Date</div>
+            <div class="result-value">{{ result.payoffDate }}</div>
+          </div>
+
+        </div>
+
+        <div class="result-info">
+          <p><strong>Note:</strong> This is an estimate. Actual payments may vary based on fees, insurance, and other factors.</p>
+        </div>
+
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="!result">
+        <div class="icon">🧮</div>
+        <p>Enter loan details above and click Calculate to see your monthly payment and total costs.</p>
+      </div>
+
+    </div>
+
+  </div>
+</div>

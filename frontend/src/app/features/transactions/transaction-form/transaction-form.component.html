@@ -1,0 +1,158 @@
+<div class="transaction-form-container">
+  <div class="form-header">
+    <h2>{{ transactionId ? 'Edit Transaction' : 'Add Transaction' }}</h2>
+    <button class="close-btn" (click)="onCancel()">
+      <span class="material-icons">close</span>
+    </button>
+  </div>
+
+  <form [formGroup]="transactionForm" (ngSubmit)="onSubmit()">
+    <!-- Transaction Type -->
+    <div class="form-group">
+      <label>Type</label>
+      <div class="type-selector">
+        <button
+          type="button"
+          *ngFor="let type of transactionTypes"
+          class="type-btn"
+          [class.active]="transactionForm.get('transactionType')?.value === type.value"
+          [class.income]="type.value === 'INCOME'"
+          [class.expense]="type.value === 'EXPENSE'"
+          (click)="transactionForm.patchValue({ transactionType: type.value })">
+          <span class="icon">{{ type.icon }}</span>
+          <span class="label">{{ type.label }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Amount -->
+    <div class="form-group">
+      <label for="amount">Amount *</label>
+      <div class="amount-input-wrapper">
+        <span class="currency">$</span>
+        <input
+          type="number"
+          id="amount"
+          formControlName="amount"
+          placeholder="0.00"
+          step="0.01"
+          min="0"
+          [class.error]="isFieldInvalid('amount')"
+        />
+      </div>
+      <div class="error-message" *ngIf="isFieldInvalid('amount')">
+        {{ getFieldError('amount') }}
+      </div>
+    </div>
+
+    <!-- Category -->
+    <div class="form-group">
+      <label for="category">Category *</label>
+      <select
+        id="category"
+        formControlName="categoryId"
+        [class.error]="isFieldInvalid('categoryId')">
+        <option value="">Select a category</option>
+        <option
+          *ngFor="let category of getAvailableCategories()"
+          [value]="category.id">
+          {{ category.categoryName }}
+        </option>
+      </select>
+      <div class="error-message" *ngIf="isFieldInvalid('categoryId')">
+        {{ getFieldError('categoryId') }}
+      </div>
+    </div>
+
+    <!-- Date -->
+    <div class="form-group">
+      <label for="date">Date *</label>
+      <input
+        type="date"
+        id="date"
+        formControlName="transactionDate"
+        [class.error]="isFieldInvalid('transactionDate')"
+      />
+      <div class="error-message" *ngIf="isFieldInvalid('transactionDate')">
+        {{ getFieldError('transactionDate') }}
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="form-group">
+      <label for="description">Description</label>
+      <input
+        type="text"
+        id="description"
+        formControlName="description"
+        placeholder="e.g., Lunch at Tim Hortons"
+      />
+    </div>
+
+    <!-- Recurring -->
+    <div class="form-group">
+      <label class="checkbox-label">
+        <input type="checkbox" formControlName="isRecurring" />
+        <span>Recurring transaction</span>
+      </label>
+    </div>
+
+    <!-- Recurring Frequency -->
+    <div class="form-group" *ngIf="transactionForm.get('isRecurring')?.value">
+      <label for="frequency">Frequency *</label>
+      <select
+        id="frequency"
+        formControlName="recurringFrequency"
+        [class.error]="isFieldInvalid('recurringFrequency')">
+        <option value="">Select frequency</option>
+        <option
+          *ngFor="let freq of recurringFrequencies"
+          [value]="freq.value">
+          {{ freq.label }}
+        </option>
+      </select>
+      <div class="error-message" *ngIf="isFieldInvalid('recurringFrequency')">
+        {{ getFieldError('recurringFrequency') }}
+      </div>
+    </div>
+
+    <!-- Tags -->
+    <div class="form-group">
+      <label for="tags">Tags</label>
+      <input
+        type="text"
+        id="tags"
+        formControlName="tags"
+        placeholder="e.g., food, restaurant"
+      />
+      <small class="hint">Comma-separated tags</small>
+    </div>
+
+    <!-- Notes -->
+    <div class="form-group">
+      <label for="notes">Notes</label>
+      <textarea
+        id="notes"
+        formControlName="notes"
+        rows="3"
+        placeholder="Additional notes (optional)"
+      ></textarea>
+    </div>
+
+    <!-- Error Alert -->
+    <div class="error-alert" *ngIf="error">
+      {{ error }}
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="form-actions">
+      <button type="button" class="btn-cancel" (click)="onCancel()" [disabled]="loading">
+        Cancel
+      </button>
+      <button type="submit" class="btn-submit" [disabled]="loading || transactionForm.invalid">
+        <span *ngIf="!loading">{{ transactionId ? 'Update' : 'Save' }}</span>
+        <span *ngIf="loading">Saving...</span>
+      </button>
+    </div>
+  </form>
+</div>

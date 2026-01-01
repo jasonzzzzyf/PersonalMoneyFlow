@@ -1,0 +1,94 @@
+<!-- transaction-list.component.html -->
+
+<div class="transaction-list-container">
+  
+  <!-- 月度统计卡片 -->
+  <div class="monthly-stats">
+    <div class="stat-card income">
+      <div class="label">Monthly Income</div>
+      <div class="amount">+${{ monthlyIncome.toFixed(2) }}</div>
+    </div>
+    <div class="stat-card expense">
+      <div class="label">Monthly Expense</div>
+      <div class="amount">-${{ monthlyExpense.toFixed(2) }}</div>
+    </div>
+    <div class="stat-card net" [class.positive]="netSavings >= 0" [class.negative]="netSavings < 0">
+      <div class="label">Net Savings</div>
+      <div class="amount">{{ netSavings >= 0 ? '+' : '' }}${{ netSavings.toFixed(2) }}</div>
+    </div>
+  </div>
+
+  <!-- 筛选器 -->
+  <div class="filters">
+    <div class="filter-buttons">
+      <button 
+        class="filter-btn" 
+        [class.active]="selectedType === 'ALL'"
+        (click)="filterByType('ALL')">
+        All
+      </button>
+      <button 
+        class="filter-btn income" 
+        [class.active]="selectedType === 'INCOME'"
+        (click)="filterByType('INCOME')">
+        Income
+      </button>
+      <button 
+        class="filter-btn expense" 
+        [class.active]="selectedType === 'EXPENSE'"
+        (click)="filterByType('EXPENSE')">
+        Expense
+      </button>
+    </div>
+    
+    <div class="search-box">
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        (input)="onSearch()"
+        placeholder="Search transactions...">
+    </div>
+  </div>
+
+  <!-- 交易列表 -->
+  <div class="transactions-list">
+    <div class="list-header">
+      <h2>Transactions ({{ filteredTransactions.length }})</h2>
+      <button class="add-btn" (click)="addTransaction()">
+        + Add New
+      </button>
+    </div>
+
+    <div class="transaction-item" *ngFor="let transaction of filteredTransactions">
+      <div class="transaction-left">
+        <div class="icon" [class.income]="transaction.transactionType === 'INCOME'" 
+                          [class.expense]="transaction.transactionType === 'EXPENSE'">
+          {{ transaction.transactionType === 'INCOME' ? '💰' : '💸' }}
+        </div>
+        <div class="transaction-info">
+          <div class="category">{{ transaction.categoryName }}</div>
+          <div class="description">{{ transaction.description }}</div>
+          <div class="date">{{ transaction.transactionDate }}</div>
+        </div>
+      </div>
+      <div class="transaction-right">
+        <div class="amount" 
+             [class.income]="transaction.transactionType === 'INCOME'"
+             [class.expense]="transaction.transactionType === 'EXPENSE'">
+          {{ transaction.transactionType === 'INCOME' ? '+' : '-' }}${{ transaction.amount.toFixed(2) }}
+        </div>
+        <button class="delete-btn" (click)="deleteTransaction(transaction, $event)">
+          🗑️
+        </button>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="filteredTransactions.length === 0">
+      <p>No transactions found</p>
+      <button class="add-btn" (click)="addTransaction()">
+        + Add Your First Transaction
+      </button>
+    </div>
+  </div>
+
+</div>

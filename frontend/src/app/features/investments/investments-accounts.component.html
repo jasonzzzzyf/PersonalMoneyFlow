@@ -1,0 +1,119 @@
+<!-- investments-accounts.component.html -->
+
+<div class="investments-container">
+  
+  <!-- Portfolio Summary -->
+  <div class="portfolio-header">
+    <h1>📊 Investment Portfolio</h1>
+    <button class="btn-add-account" (click)="openAddAccountModal()">
+      + Add Account
+    </button>
+  </div>
+
+  <div class="portfolio-summary">
+    <div class="summary-card total">
+      <div class="label">Total Portfolio Value</div>
+      <div class="value">${{ totalPortfolioValue.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</div>
+      <div class="invested">Invested: ${{ totalInvested.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</div>
+    </div>
+
+    <div class="summary-card profit" [class.positive]="totalProfitLoss >= 0" [class.negative]="totalProfitLoss < 0">
+      <div class="label">Total P&L</div>
+      <div class="value">{{ totalProfitLoss >= 0 ? '+' : '' }}${{ totalProfitLoss.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</div>
+      <div class="percent">{{ totalProfitLossPercent.toFixed(2) }}%</div>
+    </div>
+  </div>
+
+  <!-- Accounts List -->
+  <div class="accounts-list">
+    
+    <div class="account-card" *ngFor="let account of accounts">
+      
+      <!-- Account Header -->
+      <div class="account-header">
+        <div class="account-info">
+          <span class="account-icon">{{ getAccountTypeIcon(account.accountType) }}</span>
+          <div>
+            <h3>{{ account.accountName }}</h3>
+            <div class="account-type">{{ account.accountType }}</div>
+          </div>
+        </div>
+
+        <div class="account-summary">
+          <div class="account-value">${{ account.totalValue.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</div>
+          <div class="account-pl" [class.positive]="account.profitLoss >= 0">
+            {{ account.profitLoss >= 0 ? '+' : '' }}${{ account.profitLoss.toFixed(2) }}
+            ({{ account.profitLossPercent.toFixed(2) }}%)
+          </div>
+        </div>
+
+        <div class="account-actions">
+          <button class="btn-add-stock" (click)="openAddStockModal(account.id)">
+            + Add Stock
+          </button>
+          <button class="btn-delete" (click)="deleteAccount(account.id)">
+            🗑️
+          </button>
+        </div>
+      </div>
+
+      <!-- Stocks List -->
+      <div class="stocks-list" *ngIf="account.stocks.length > 0">
+        <div class="stock-item" *ngFor="let stock of account.stocks">
+          <div class="stock-info">
+            <div class="stock-symbol">{{ stock.symbol }}</div>
+            <div class="stock-name">{{ stock.name }}</div>
+            <div class="stock-details">{{ stock.shares }} shares @ ${{ stock.avgCost.toFixed(2) }}</div>
+          </div>
+
+          <div class="stock-values">
+            <div class="current-price">${{ stock.currentPrice.toFixed(2) }}</div>
+            <div class="current-value">${{ stock.currentValue.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</div>
+          </div>
+
+          <div class="stock-pl" [class.positive]="stock.profitLoss >= 0" [class.negative]="stock.profitLoss < 0">
+            <div class="pl-amount">{{ stock.profitLoss >= 0 ? '+' : '' }}${{ stock.profitLoss.toFixed(2) }}</div>
+            <div class="pl-percent">({{ stock.profitLossPercent.toFixed(2) }}%)</div>
+          </div>
+
+          <button class="btn-delete-small" (click)="deleteStock(account.id, stock.id)">✕</button>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="account.stocks.length === 0">
+        <p>No stocks in this account</p>
+        <button (click)="openAddStockModal(account.id)">+ Add Your First Stock</button>
+      </div>
+
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state-main" *ngIf="accounts.length === 0">
+      <div class="icon">📊</div>
+      <h3>No Investment Accounts</h3>
+      <p>Create your first investment account to start tracking your portfolio</p>
+      <button class="btn-primary" (click)="openAddAccountModal()">
+        + Create Account
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Modals (简化版) -->
+<div class="modal-overlay" *ngIf="showAddAccountModal" (click)="closeModals()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h3>Add Account</h3>
+    <p>Account creation form will go here</p>
+    <button (click)="closeModals()">Close</button>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showAddStockModal" (click)="closeModals()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h3>Add Stock</h3>
+    <p>Stock creation form will go here</p>
+    <button (click)="closeModals()">Close</button>
+  </div>
+</div>

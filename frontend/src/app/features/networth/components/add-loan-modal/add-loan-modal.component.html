@@ -1,0 +1,140 @@
+<!-- add-loan-modal.component.html -->
+
+<div class="modal-overlay" (click)="closeModal()">
+  <div class="modal-content large" (click)="$event.stopPropagation()">
+    
+    <div class="modal-header">
+      <h2>Add Loan</h2>
+      <button class="close-btn" (click)="closeModal()">✕</button>
+    </div>
+
+    <form [formGroup]="loanForm" (ngSubmit)="onSubmit()">
+      
+      <!-- Loan Type Selection -->
+      <div class="form-group">
+        <label>Loan Type *</label>
+        <div class="type-grid">
+          <div 
+            *ngFor="let type of loanTypes"
+            class="type-card"
+            [class.selected]="loanForm.get('loanType')?.value === type.value"
+            (click)="selectLoanType(type.value)">
+            <div class="type-icon">{{ type.icon }}</div>
+            <div class="type-label">{{ type.label }}</div>
+            <div class="type-description">{{ type.description }}</div>
+          </div>
+        </div>
+        <div class="error-message" *ngIf="isFieldInvalid('loanType')">
+          Please select a loan type
+        </div>
+      </div>
+
+      <!-- Loan Name -->
+      <div class="form-group">
+        <label>Loan Name *</label>
+        <input 
+          type="text" 
+          formControlName="loanName"
+          class="form-control"
+          placeholder="e.g., Home Mortgage, Honda Civic Loan"
+          [class.invalid]="isFieldInvalid('loanName')">
+        <div class="error-message" *ngIf="isFieldInvalid('loanName')">
+          Please enter a loan name
+        </div>
+      </div>
+
+      <!-- Loan Details Grid -->
+      <div class="form-grid">
+        
+        <!-- Principal Amount -->
+        <div class="form-group">
+          <label>Principal Amount ($) *</label>
+          <input 
+            type="number" 
+            formControlName="principalAmount"
+            class="form-control"
+            placeholder="0.00"
+            step="100"
+            [class.invalid]="isFieldInvalid('principalAmount')">
+          <div class="error-message" *ngIf="isFieldInvalid('principalAmount')">
+            Required
+          </div>
+        </div>
+
+        <!-- Interest Rate -->
+        <div class="form-group">
+          <label>Interest Rate (%) *</label>
+          <input 
+            type="number" 
+            formControlName="interestRate"
+            class="form-control"
+            placeholder="3.5"
+            step="0.1"
+            [class.invalid]="isFieldInvalid('interestRate')">
+          <div class="error-message" *ngIf="isFieldInvalid('interestRate')">
+            Required
+          </div>
+        </div>
+
+        <!-- Term -->
+        <div class="form-group">
+          <label>Term (months) *</label>
+          <input 
+            type="number" 
+            formControlName="termMonths"
+            class="form-control"
+            placeholder="360"
+            [class.invalid]="isFieldInvalid('termMonths')">
+          <div class="error-message" *ngIf="isFieldInvalid('termMonths')">
+            Required
+          </div>
+        </div>
+
+        <!-- Start Date -->
+        <div class="form-group">
+          <label>Start Date *</label>
+          <input 
+            type="date" 
+            formControlName="startDate"
+            class="form-control"
+            [class.invalid]="isFieldInvalid('startDate')">
+          <div class="error-message" *ngIf="isFieldInvalid('startDate')">
+            Required
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Calculated Monthly Payment -->
+      <div class="calculated-payment" *ngIf="calculatedPayment > 0">
+        <div class="payment-label">Estimated Monthly Payment</div>
+        <div class="payment-amount">${{ calculatedPayment.toFixed(2) }}</div>
+      </div>
+
+      <!-- Notes -->
+      <div class="form-group">
+        <label>Notes <span class="optional">(Optional)</span></label>
+        <textarea 
+          formControlName="notes"
+          class="form-control"
+          rows="2"
+          placeholder="Add any additional notes..."></textarea>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="button-group">
+        <button type="button" class="btn btn-cancel" (click)="closeModal()">
+          Cancel
+        </button>
+        <button 
+          type="submit" 
+          class="btn btn-submit"
+          [disabled]="saving">
+          {{ saving ? 'Saving...' : 'Add Loan' }}
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+</div>

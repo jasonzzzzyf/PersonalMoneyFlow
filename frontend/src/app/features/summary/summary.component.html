@@ -1,0 +1,162 @@
+<!-- summary.component.html -->
+<div class="summary-container">
+  <!-- Header -->
+  <div class="summary-header">
+    <h1>📊 Summary</h1>
+    <span class="today-badge">Today</span>
+  </div>
+
+  <!-- Today's Summary Card -->
+  <div class="summary-card today-card">
+    <div class="card-header">
+      <h2>💰 Today's Summary</h2>
+      <span class="date">{{ todaySummary.date }}</span>
+    </div>
+    <div class="card-body">
+      <div class="net-amount" [ngClass]="todaySummary.net >= 0 ? 'positive' : 'negative'">
+        {{ formatCurrency(todaySummary.net) }}
+      </div>
+      <div class="income-expense-row">
+        <div class="income-item">
+          <span class="label">Income</span>
+          <span class="amount positive">+{{ formatCurrency(todaySummary.income) }}</span>
+        </div>
+        <div class="expense-item">
+          <span class="label">Expense</span>
+          <span class="amount negative">-{{ formatCurrency(todaySummary.expense) }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monthly Summary Section -->
+  <div class="section-title">📅 Monthly Summary</div>
+  <div class="monthly-summary-card" (click)="navigateToDetails()">
+    <div class="month-info">
+      <span class="month-label">{{ getMonthName(currentMonthSummary.month) }}</span>
+      <span class="chevron">›</span>
+    </div>
+    <div class="summary-grid">
+      <div class="summary-item">
+        <span class="item-label">Income</span>
+        <span class="item-value">{{ formatCurrency(currentMonthSummary.income) }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="item-label">Expense</span>
+        <span class="item-value">{{ formatCurrency(currentMonthSummary.expense) }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="item-label">Net</span>
+        <span class="item-value" [ngClass]="currentMonthSummary.net >= 0 ? 'positive' : 'negative'">
+          {{ formatCurrency(currentMonthSummary.net) }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Budget Section -->
+  <div class="section-title">💰 {{ getMonthName(currentBudget.month) }} Budget</div>
+  <div class="budget-card" (click)="navigateToBudget()">
+    <div class="budget-circle">
+      <svg width="120" height="120" viewBox="0 0 120 120">
+        <circle cx="60" cy="60" r="50" 
+                fill="none" 
+                stroke="#f0f0f0" 
+                stroke-width="10"/>
+        <circle cx="60" cy="60" r="50" 
+                fill="none" 
+                stroke="#F5D547" 
+                stroke-width="10"
+                [attr.stroke-dasharray]="314.159"
+                [attr.stroke-dashoffset]="314.159 * (1 - currentBudget.percentUsed / 100)"
+                transform="rotate(-90 60 60)"/>
+      </svg>
+      <div class="budget-text">
+        <div class="budget-percentage">{{ currentBudget.percentUsed.toFixed(0) }}%</div>
+        <div class="budget-label">Remaining</div>
+      </div>
+    </div>
+    <div class="budget-details">
+      <div class="budget-row">
+        <span class="budget-label">Remaining Budget:</span>
+        <span class="budget-amount">{{ formatCurrency(currentBudget.remaining) }}</span>
+      </div>
+      <div class="budget-row">
+        <span class="budget-label">Monthly Budget:</span>
+        <span class="budget-amount">{{ formatCurrency(currentBudget.totalBudget) }}</span>
+      </div>
+      <div class="budget-row">
+        <span class="budget-label">Monthly Spent:</span>
+        <span class="budget-amount negative">{{ formatCurrency(currentBudget.spent) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Section -->
+  <div class="section-title">📈 Analysis</div>
+  
+  <!-- Income vs Expense Chart -->
+  <div class="chart-card">
+    <h3>Income vs Expense (Last 3 Months)</h3>
+    <div class="simple-bar-chart">
+      <div class="chart-bar" *ngFor="let data of monthlyChartData">
+        <div class="bar-group">
+          <div class="bar income-bar" [style.height.px]="data.income / 50"></div>
+          <div class="bar expense-bar" [style.height.px]="data.expense / 50"></div>
+        </div>
+        <span class="bar-label">{{ data.month }}</span>
+      </div>
+    </div>
+    <div class="chart-legend">
+      <span class="legend-item">
+        <span class="legend-color income"></span> Income
+      </span>
+      <span class="legend-item">
+        <span class="legend-color expense"></span> Expense
+      </span>
+    </div>
+  </div>
+
+  <!-- Category Breakdown -->
+  <div class="chart-card">
+    <h3>Category Breakdown</h3>
+    <div class="category-list">
+      <div class="category-item" *ngFor="let cat of categoryChartData">
+        <div class="category-info">
+          <span class="category-name">{{ cat.category }}</span>
+          <span class="category-amount">{{ formatCurrency(cat.amount) }}</span>
+        </div>
+        <div class="category-bar">
+          <div class="category-fill" [style.width.%]="cat.percentage"></div>
+        </div>
+        <span class="category-percent">{{ cat.percentage.toFixed(1) }}%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Yearly Summary Section -->
+  <div class="section-title">📅 Year Summary</div>
+  <div class="yearly-summary-card">
+    <div class="yearly-table">
+      <div class="table-header">
+        <span class="col-year">Year</span>
+        <span class="col-income">Income</span>
+        <span class="col-expense">Expense</span>
+        <span class="col-net">Net</span>
+      </div>
+      <div class="table-row" 
+           *ngFor="let year of yearlySummaries" 
+           (click)="navigateToYear(year.year)">
+        <span class="col-year">{{ year.year }}</span>
+        <span class="col-income">{{ formatCurrency(year.income) }}</span>
+        <span class="col-expense">{{ formatCurrency(year.expense) }}</span>
+        <span class="col-net" [ngClass]="year.net >= 0 ? 'positive' : 'negative'">
+          {{ formatCurrency(year.net) }}
+        </span>
+      </div>
+    </div>
+    <div class="yearly-note">
+      Year accounts are natural years (1.1 - 12.31)
+    </div>
+  </div>
+</div>

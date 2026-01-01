@@ -1,0 +1,123 @@
+<!-- investment-list.component.html -->
+<div class="investment-container">
+  
+  <!-- 顶部导航 -->
+  <div class="top-bar">
+    <h1 class="page-title">Investment Portfolio</h1>
+    <button class="refresh-button" (click)="refreshPrices()" [disabled]="isRefreshing">
+      <span class="refresh-icon" [class.spinning]="isRefreshing">🔄</span>
+    </button>
+  </div>
+
+  <!-- 加载中 -->
+  <div class="loading-container" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading portfolio...</p>
+  </div>
+
+  <!-- 错误提示 -->
+  <div class="error-banner" *ngIf="errorMessage && !isLoading">
+    <span class="error-icon">⚠️</span>
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <!-- 投资组合内容 -->
+  <div class="portfolio-content" *ngIf="!isLoading && portfolioSummary">
+    
+    <!-- 投资组合摘要卡片 -->
+    <div class="portfolio-summary-card">
+      <div class="summary-header">
+        <h2>Total Portfolio Value</h2>
+      </div>
+      
+      <div class="total-value">
+        {{ formatCurrency(portfolioSummary.currentValue) }}
+      </div>
+
+      <div class="summary-details">
+        <div class="detail-item">
+          <span class="detail-label">Total Invested</span>
+          <span class="detail-value">{{ formatCurrency(portfolioSummary.totalInvested) }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Total P&L</span>
+          <span class="detail-value" [ngClass]="getProfitLossClass(portfolioSummary.totalProfitLoss)">
+            {{ formatCurrency(portfolioSummary.totalProfitLoss) }}
+            ({{ formatPercent(portfolioSummary.profitLossPercent) }})
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 投资列表标题 -->
+    <div class="section-header">
+      <h3>Your Stocks & ETFs</h3>
+      <span class="stock-count">{{ investments.length }} holdings</span>
+    </div>
+
+    <!-- 空状态 -->
+    <div class="empty-state" *ngIf="investments.length === 0">
+      <div class="empty-icon">📊</div>
+      <h3>No Investments Yet</h3>
+      <p>Start building your portfolio by adding your first investment</p>
+      <button class="btn-add-first" (click)="addInvestment()">
+        <span class="add-icon">+</span>
+        Add Investment
+      </button>
+    </div>
+
+    <!-- 投资列表 -->
+    <div class="investment-list" *ngIf="investments.length > 0">
+      <div 
+        class="investment-card" 
+        *ngFor="let investment of investments"
+        (click)="viewInvestment(investment)">
+        
+        <div class="card-header">
+          <div class="stock-info">
+            <h4 class="stock-symbol">{{ investment.stockSymbol }}</h4>
+            <p class="stock-name">{{ investment.stockName || 'N/A' }}</p>
+          </div>
+          <div class="type-badge">{{ getTypeLabel(investment.investmentType) }}</div>
+        </div>
+
+        <div class="card-body">
+          <div class="info-row">
+            <span class="info-label">Shares</span>
+            <span class="info-value">{{ investment.totalShares }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Avg Cost</span>
+            <span class="info-value">{{ formatCurrency(investment.averageCost) }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Current Price</span>
+            <span class="info-value">{{ formatCurrency(investment.currentPrice) }}</span>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <div class="total-value-section">
+            <span class="label">Total Value</span>
+            <span class="value">{{ formatCurrency(investment.currentValue) }}</span>
+          </div>
+          <div class="profit-loss-section" [ngClass]="getProfitLossClass(investment.profitLoss)">
+            <span class="pl-amount">{{ formatCurrency(investment.profitLoss) }}</span>
+            <span class="pl-percent">{{ formatPercent(investment.profitLossPercent) }}</span>
+          </div>
+        </div>
+
+        <div class="last-updated" *ngIf="investment.lastUpdated">
+          Updated: {{ investment.lastUpdated | date:'short' }}
+        </div>
+      </div>
+    </div>
+
+    <!-- 添加按钮 -->
+    <button class="fab-add" (click)="addInvestment()" *ngIf="investments.length > 0">
+      <span class="add-icon">+</span>
+    </button>
+
+  </div>
+
+</div>

@@ -1,0 +1,29 @@
+<!-- categories.component.html -->
+
+<div class="categories-container">
+  <h1>Categories</h1>
+
+  <div class="category-section" *ngIf="!loading">
+    <h2 class="income-header">📈 Income Categories</h2>
+    <div class="category-list">
+      <div class="category-item income" *ngFor="let category of incomeCategories">
+        <span class="icon">💰</span>
+        <span class="name">{{ category.categoryName }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="category-section" *ngIf="!loading">
+    <h2 class="expense-header">📉 Expense Categories</h2>
+    <div class="category-list">
+      <div class="category-item expense" *ngFor="let category of expenseCategories">
+        <span class="icon">💸</span>
+        <span class="name">{{ category.categoryName }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading" *ngIf="loading">
+    <p>Loading categories...</p>
+  </div>
+</div>

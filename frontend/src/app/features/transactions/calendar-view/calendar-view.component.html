@@ -1,0 +1,211 @@
+<!-- calendar-view.component.html - 带 List View 切换 -->
+<div class="calendar-container">
+  
+  <!-- 今日摘要卡片 -->
+  <div class="today-summary-card">
+    <h2>Today's Summary</h2>
+    <div class="summary-date">{{ todaySummary.date }}</div>
+    <div class="net-amount" [class.positive]="todaySummary.net >= 0" [class.negative]="todaySummary.net < 0">
+      {{ formatCurrency(todaySummary.net) }}
+    </div>
+    <div class="income-expense-row">
+      <div class="amount-item">
+        <span class="label">Income</span>
+        <span class="value positive">{{ formatCurrency(todaySummary.income) }}</span>
+      </div>
+      <div class="amount-item">
+        <span class="label">Expense</span>
+        <span class="value negative">{{ formatCurrency(todaySummary.expense) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🆕 View Toggle - 视图切换按钮 -->
+  <div class="view-toggle">
+    <button 
+      class="toggle-btn"
+      [class.active]="viewMode === 'calendar'"
+      (click)="switchView('calendar')">
+      <span class="icon">📅</span>
+      <span>Calendar</span>
+    </button>
+    <button 
+      class="toggle-btn"
+      [class.active]="viewMode === 'list'"
+      (click)="switchView('list')">
+      <span class="icon">📋</span>
+      <span>List</span>
+    </button>
+  </div>
+
+  <!-- Calendar View -->
+  <div class="calendar-view" *ngIf="viewMode === 'calendar'">
+    <!-- 日历导航 -->
+    <div class="calendar-header">
+      <button class="nav-button" (click)="previousMonth()">←</button>
+      <h2 class="calendar-title">{{ getMonthName(currentMonth) }} {{ currentYear }}</h2>
+      <button class="nav-button" (click)="nextMonth()">→</button>
+      <button class="today-button" (click)="goToToday()">Today</button>
+    </div>
+
+    <!-- 星期标题 -->
+    <div class="weekday-header">
+      <div class="weekday">Mon</div>
+      <div class="weekday">Tue</div>
+      <div class="weekday">Wed</div>
+      <div class="weekday">Thu</div>
+      <div class="weekday">Fri</div>
+      <div class="weekday">Sat</div>
+      <div class="weekday">Sun</div>
+    </div>
+
+    <!-- 日历网格 -->
+    <div class="calendar-grid">
+      <div class="day-cell" 
+           *ngFor="let day of calendarDays"
+           [class.today]="day.isToday"
+           [class.selected]="day.isSelected"
+           [class.other-month]="!day.isCurrentMonth"
+           [class.has-data]="day.income > 0 || day.expense > 0"
+           (click)="onDayClick(day)">
+        <div class="day-number">{{ day.dayOfMonth }}</div>
+        <div class="day-amounts" *ngIf="day.isCurrentMonth && (day.income > 0 || day.expense > 0)">
+          <div class="income-amount" *ngIf="day.income > 0">
+            {{ formatShortCurrency(day.income) }}
+          </div>
+          <div class="expense-amount" *ngIf="day.expense > 0">
+            {{ formatShortCurrency(-day.expense) }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🆕 List View - 所有交易列表 -->
+  <div class="list-view" *ngIf="viewMode === 'list'">
+    <div class="list-header">
+      <h2>All Transactions</h2>
+      <div class="filter-section">
+        <input 
+          type="text" 
+          class="search-input"
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="filterTransactions()"
+          placeholder="Search transactions...">
+        <select 
+          class="filter-select"
+          [(ngModel)]="filterType"
+          (ngModelChange)="filterTransactions()">
+          <option value="ALL">All Types</option>
+          <option value="INCOME">Income Only</option>
+          <option value="EXPENSE">Expense Only</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="transactions-by-date">
+      <div class="empty-state" *ngIf="groupedTransactions.length === 0">
+        <p>No transactions found</p>
+        <button class="add-button" (click)="addTransactionForDay()">
+          + Add Transaction
+        </button>
+      </div>
+
+      <div class="date-group" *ngFor="let group of groupedTransactions">
+        <div class="date-header">
+          <span class="date">{{ formatDate(group.date) }}</span>
+          <span class="summary">
+            <span class="income" *ngIf="group.totalIncome > 0">+{{ formatCurrency(group.totalIncome) }}</span>
+            <span class="expense" *ngIf="group.totalExpense > 0">-{{ formatCurrency(group.totalExpense) }}</span>
+          </span>
+        </div>
+
+        <div class="transaction-item"
+             *ngFor="let transaction of group.transactions"
+             [class.income]="transaction.transactionType === 'INCOME'"
+             [class.expense]="transaction.transactionType === 'EXPENSE'">
+          <div class="transaction-icon">
+            {{ transaction.transactionType === 'INCOME' ? '📤' : '📥' }}
+          </div>
+          <div class="transaction-info">
+            <div class="transaction-category">{{ transaction.categoryName || 'Uncategorized' }}</div>
+            <div class="transaction-description">{{ transaction.description }}</div>
+            <div class="transaction-time">{{ formatTime(transaction.createdAt) }}</div>
+          </div>
+          <div class="transaction-amount"
+               [class.positive]="transaction.transactionType === 'INCOME'"
+               [class.negative]="transaction.transactionType === 'EXPENSE'">
+            {{ transaction.transactionType === 'INCOME' ? '+' : '-' }}{{ formatCurrency(transaction.amount) }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Sheet - 显示点击日期的交易详情 -->
+  <div class="bottom-sheet" *ngIf="selectedDay" [@slideUp]>
+    <div class="bottom-sheet-overlay" (click)="closeDetails()"></div>
+    <div class="bottom-sheet-content">
+      <div class="drag-handle"></div>
+      
+      <div class="sheet-header">
+        <h3>{{ formatDateToString(selectedDay.date) }}</h3>
+        <button class="close-button" (click)="closeDetails()">×</button>
+      </div>
+
+      <div class="daily-summary">
+        <div class="summary-item">
+          <span class="label">Net</span>
+          <span class="value" [class.positive]="selectedDay.netAmount >= 0" [class.negative]="selectedDay.netAmount < 0">
+            {{ formatCurrency(selectedDay.netAmount) }}
+          </span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Income</span>
+          <span class="value positive">{{ formatCurrency(selectedDay.income) }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Expense</span>
+          <span class="value negative">{{ formatCurrency(selectedDay.expense) }}</span>
+        </div>
+      </div>
+
+      <div class="transactions-list">
+        <div class="empty-state" *ngIf="selectedDay.transactions.length === 0">
+          <p>No transactions on this day</p>
+          <button class="add-button" (click)="addTransactionForDay(selectedDay)">
+            + Add Transaction
+          </button>
+        </div>
+
+        <div *ngIf="selectedDay.transactions.length > 0">
+          <h4 class="section-title">Transactions ({{ selectedDay.transactions.length }})</h4>
+          
+          <div class="transaction-item" 
+               *ngFor="let transaction of selectedDay.transactions"
+               [class.income]="transaction.transactionType === 'INCOME'"
+               [class.expense]="transaction.transactionType === 'EXPENSE'">
+            <div class="transaction-icon">
+              {{ transaction.transactionType === 'INCOME' ? '📤' : '📥' }}
+            </div>
+            <div class="transaction-info">
+              <div class="transaction-category">{{ transaction.categoryName || 'Uncategorized' }}</div>
+              <div class="transaction-description">{{ transaction.description }}</div>
+              <div class="transaction-time">{{ formatTime(transaction.createdAt) }}</div>
+            </div>
+            <div class="transaction-amount" 
+                 [class.positive]="transaction.transactionType === 'INCOME'"
+                 [class.negative]="transaction.transactionType === 'EXPENSE'">
+              {{ transaction.transactionType === 'INCOME' ? '+' : '-' }}{{ formatCurrency(transaction.amount) }}
+            </div>
+          </div>
+
+          <button class="add-button-bottom" (click)="addTransactionForDay(selectedDay)">
+            + Add Transaction for {{ formatDateToString(selectedDay.date) }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

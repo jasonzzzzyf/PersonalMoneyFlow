@@ -1,0 +1,46 @@
+<div class="transactions-container">
+  <div class="balance-banner">
+    <div class="balance-amount">{{ formatAmount(totalBalance) }}</div>
+  </div>
+
+  <div class="summary-cards">
+    <div class="summary-card income-card">
+      <div class="card-label">Income</div>
+      <div class="card-amount">{{ formatAmount(totalIncome) }}</div>
+    </div>
+    <div class="summary-card expense-card">
+      <div class="card-label">Expense</div>
+      <div class="card-amount">{{ formatAmount(totalExpense) }}</div>
+    </div>
+  </div>
+
+  <div class="calendar-nav">
+    <button class="nav-btn" (click)="previousMonth()"><span>←</span></button>
+    <h2 class="month-title">{{ getMonthYear() }}</h2>
+    <button class="nav-btn" (click)="nextMonth()"><span>→</span></button>
+    <button class="today-btn" (click)="goToToday()">Today</button>
+  </div>
+
+  <div class="calendar">
+    <div class="calendar-header">
+      <div class="day-header" *ngFor="let day of weekDays">{{ day }}</div>
+    </div>
+
+    <div class="calendar-grid">
+      <div *ngFor="let dayData of calendarDays" class="calendar-day"
+        [class.today]="isToday(dayData.date)"
+        [class.other-month]="isOtherMonth(dayData.date)"
+        [class.has-transactions]="dayData.transactions.length > 0">
+        <div class="day-number">{{ dayData.date.getDate() }}</div>
+        <div class="day-transactions" *ngIf="dayData.transactions.length > 0">
+          <div class="transaction-amount income" *ngIf="dayData.totalIncome > 0">
+            {{ formatShortAmount(dayData.totalIncome) }}
+          </div>
+          <div class="transaction-amount expense" *ngIf="dayData.totalExpense > 0">
+            {{ formatShortAmount(dayData.totalExpense) }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

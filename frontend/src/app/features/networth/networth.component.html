@@ -1,0 +1,93 @@
+<!-- networth.component.html - 简化版 Net Worth -->
+<div class="networth-container">
+  
+  <!-- Net Worth Summary Card -->
+  <div class="summary-card">
+    <h2>Net Worth</h2>
+    <div class="net-worth-amount" [class.positive]="netWorth >= 0" [class.negative]="netWorth < 0">
+      ${{ netWorth.toFixed(2) }}
+    </div>
+    <div class="summary-row">
+      <div class="summary-item">
+        <span class="label">Assets</span>
+        <span class="value positive">${{ totalAssets.toFixed(2) }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="label">Liabilities</span>
+        <span class="value negative">${{ totalLiabilities.toFixed(2) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assets Section -->
+  <div class="section">
+    <div class="section-header">
+      <h3>Assets</h3>
+      <button class="add-btn" (click)="showAddAssetModal = true">+ Add</button>
+    </div>
+
+    <div class="empty-state" *ngIf="assets.length === 0">
+      <p>No assets yet</p>
+      <button class="add-button" (click)="showAddAssetModal = true">+ Add Your First Asset</button>
+    </div>
+
+    <div class="item-list" *ngIf="assets.length > 0">
+      <div class="item-card" *ngFor="let asset of assets">
+        <div class="item-icon">{{ getAssetIcon(asset.assetType) }}</div>
+        <div class="item-info">
+          <div class="item-name">{{ asset.assetName }}</div>
+          <div class="item-type">{{ asset.assetType }}</div>
+        </div>
+        <div class="item-value">${{ asset.currentValue.toFixed(2) }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Liabilities Section -->
+  <div class="section">
+    <div class="section-header">
+      <h3>Liabilities</h3>
+      <button class="add-btn" (click)="showAddLoanModal = true">+ Add</button>
+    </div>
+
+    <div class="empty-state" *ngIf="liabilities.length === 0">
+      <p>No liabilities yet</p>
+      <button class="add-button" (click)="showAddLoanModal = true">+ Add Your First Loan</button>
+    </div>
+
+    <div class="item-list" *ngIf="liabilities.length > 0">
+      <div class="item-card" *ngFor="let loan of liabilities">
+        <div class="item-icon">{{ getLoanIcon(loan.loanType) }}</div>
+        <div class="item-info">
+          <div class="item-name">{{ loan.loanName }}</div>
+          <div class="item-type">{{ loan.loanType }}</div>
+          <div class="loan-progress">
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="getLoanProgress(loan)"></div>
+            </div>
+            <span class="progress-text">{{ getLoanProgress(loan) }}% paid</span>
+          </div>
+        </div>
+        <div class="item-value negative">${{ loan.remainingBalance.toFixed(2) }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Simple Modals (Placeholder) -->
+  <div class="modal-overlay" *ngIf="showAddAssetModal" (click)="closeModals()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>Add Asset</h3>
+      <p>Asset form coming soon...</p>
+      <button (click)="closeModals()">Close</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" *ngIf="showAddLoanModal" (click)="closeModals()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>Add Loan</h3>
+      <p>Loan form coming soon...</p>
+      <button (click)="closeModals()">Close</button>
+    </div>
+  </div>
+
+</div>

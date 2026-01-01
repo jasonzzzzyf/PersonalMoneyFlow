@@ -1,0 +1,89 @@
+<!-- src/app/features/investments/add-asset-dialog/add-asset-dialog.component.html -->
+
+<div class="dialog-container">
+  <h2 mat-dialog-title>Add Asset</h2>
+  
+  <mat-dialog-content class="dialog-content">
+    <form [formGroup]="assetForm">
+      <!-- Asset Type Selection -->
+      <div class="form-group">
+        <label>Asset Type <span class="required">*</span></label>
+        <div class="asset-type-grid">
+          <div 
+            *ngFor="let type of assetTypes"
+            class="asset-type-card"
+            [class.selected]="assetForm.get('assetType')?.value === type.value"
+            (click)="selectAssetType(type.value)">
+            <span class="icon">{{ type.icon }}</span>
+            <span class="label">{{ type.label }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Asset Name -->
+      <div class="form-group">
+        <label for="assetName">Asset Name <span class="required">*</span></label>
+        <input 
+          type="text"
+          id="assetName"
+          formControlName="assetName"
+          placeholder="e.g., Savings Account, Primary Home"
+          class="form-control"
+          [class.error]="assetForm.get('assetName')?.invalid && assetForm.get('assetName')?.touched">
+        <div class="error-message" *ngIf="getErrorMessage('assetName')">
+          {{ getErrorMessage('assetName') }}
+        </div>
+      </div>
+
+      <!-- Current Value -->
+      <div class="form-group">
+        <label for="currentValue">Current Value (CAD) <span class="required">*</span></label>
+        <div class="input-with-prefix">
+          <span class="prefix">$</span>
+          <input 
+            type="number"
+            id="currentValue"
+            formControlName="currentValue"
+            placeholder="0.00"
+            step="0.01"
+            min="0"
+            class="form-control with-prefix"
+            [class.error]="assetForm.get('currentValue')?.invalid && assetForm.get('currentValue')?.touched">
+        </div>
+        <div class="error-message" *ngIf="getErrorMessage('currentValue')">
+          {{ getErrorMessage('currentValue') }}
+        </div>
+      </div>
+
+      <!-- Notes (Optional) -->
+      <div class="form-group">
+        <label for="notes">Notes (Optional)</label>
+        <textarea 
+          id="notes"
+          formControlName="notes"
+          placeholder="Add any additional information..."
+          rows="3"
+          class="form-control"></textarea>
+        <div class="char-count" *ngIf="assetForm.get('notes')?.value">
+          {{ assetForm.get('notes')?.value.length }} / 1000
+        </div>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="dialog-actions">
+    <button 
+      type="button"
+      class="btn-cancel"
+      (click)="onCancel()">
+      Cancel
+    </button>
+    <button 
+      type="submit"
+      class="btn-submit"
+      [disabled]="assetForm.invalid"
+      (click)="onSubmit()">
+      Add Asset
+    </button>
+  </mat-dialog-actions>
+</div>
