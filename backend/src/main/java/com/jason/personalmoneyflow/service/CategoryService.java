@@ -4,6 +4,7 @@ package com.jason.personalmoneyflow.service;
 
 import com.jason.personalmoneyflow.model.dto.request.CategoryRequest;
 import com.jason.personalmoneyflow.model.dto.response.CategoryResponse;
+import com.jason.personalmoneyflow.exception.ResourceNotFoundException;
 import com.jason.personalmoneyflow.model.entity.CustomCategory;
 import com.jason.personalmoneyflow.repository.CustomCategoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,12 @@ public class CategoryService {
                 .collect(Collectors.toList());
     }
 
+    public CategoryResponse getCategoryById(Long userId, Long categoryId) {
+        CustomCategory category = categoryRepository.findByIdAndUserId(categoryId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+        return mapToResponse(category);
+    }
+
     @Transactional
     public CategoryResponse createCategory(Long userId, CategoryRequest request) {
         CustomCategory category = CustomCategory.builder()
@@ -44,7 +51,7 @@ public class CategoryService {
     @Transactional
     public CategoryResponse updateCategory(Long userId, Long categoryId, CategoryRequest request) {
         CustomCategory category = categoryRepository.findByIdAndUserId(categoryId, userId)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
         category.setCategoryName(request.getCategoryName());
         category.setIcon(request.getIcon());
@@ -57,7 +64,7 @@ public class CategoryService {
     @Transactional
     public void deleteCategory(Long userId, Long categoryId) {
         CustomCategory category = categoryRepository.findByIdAndUserId(categoryId, userId)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
         if (category.getIsDefault()) {
             throw new RuntimeException("Cannot delete default category");
