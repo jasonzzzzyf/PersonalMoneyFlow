@@ -1,15 +1,18 @@
-// TransactionController.java - 简化公开版本
+// TransactionController.java
 
 package com.jason.personalmoneyflow.controller;
 
 import com.jason.personalmoneyflow.model.dto.request.TransactionRequest;
 import com.jason.personalmoneyflow.model.dto.response.TransactionResponse;
 import com.jason.personalmoneyflow.service.TransactionService;
+import com.jason.personalmoneyflow.security.JwtTokenProvider;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/transactions")
@@ -18,44 +21,32 @@ import org.springframework.web.bind.annotation.*;
 public class TransactionController {
 
     private final TransactionService transactionService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @GetMapping
-    public ResponseEntity<Page<TransactionResponse>> getAllTransactions(Pageable pageable) {
-        Long userId = 1L;
-        Page<TransactionResponse> transactions = transactionService.getTransactions(userId, pageable);
+    public ResponseEntity<List<TransactionResponse>> getAllTransactions(HttpServletRequest request) {
+        Long userId = jwtTokenProvider.getUserIdFromRequest(request);
+        List<TransactionResponse> transactions = transactionService.getTransactions(userId);
         return ResponseEntity.ok(transactions);
     }
 
     @PostMapping
-    public ResponseEntity<TransactionResponse> createTransaction(@RequestBody TransactionRequest request) {
-        Long userId = 1L;
-        System.out.println("=== Creating Transaction ===");
-        System.out.println("Request: " + request);
+    public ResponseEntity<TransactionResponse> createTransaction(
+            @Valid @RequestBody TransactionRequest request,
+            HttpServletRequest rawRequest
+    ) {
+        Long userId = jwtTokenProvider.getUserIdFromRequest(rawRequest);
         TransactionResponse transaction = transactionService.createTransaction(userId, request);
-        System.out.println("Created with ID: " + transaction.getId());
         return ResponseEntity.ok(transaction);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TransactionResponse> getTransaction(@PathVariable Long id) {
-        Long userId = 1L;
+    public ResponseEntity<TransactionResponse> getTransaction(
+            @PathVariable Long id,
+            HttpServletRequest request
+    ) {
+        Long userId = jwtTokenProvider.getUserIdFromRequest(request);
         TransactionResponse transaction = transactionService.getTransactionById(userId, id);
         return ResponseEntity.ok(transaction);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<TransactionResponse> updateTransaction(
-            @PathVariable Long id,
-            @RequestBody TransactionRequest request) {
-        Long userId = 1L;
-        TransactionResponse transaction = transactionService.updateTransaction(userId, id, request);
-        return ResponseEntity.ok(transaction);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTransaction(@PathVariable Long id) {
-        Long userId = 1L;
-        transactionService.deleteTransaction(userId, id);
-        return ResponseEntity.noContent().build();
     }
 }
