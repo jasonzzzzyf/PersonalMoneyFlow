@@ -45,10 +45,6 @@ spring:
   application:
     name: PersonalMoneyManagement
 
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
-
 server:
   port: ${PORT}
 
