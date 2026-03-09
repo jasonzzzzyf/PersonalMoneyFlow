@@ -1,0 +1,84 @@
+<!-- loan-scanner.component.html -->
+<div class="scanner-container">
+
+  <div class="scanner-header">
+    <h3>🤖 AI Loan Scanner</h3>
+    <p>Upload a loan document photo or PDF and Claude AI will extract the key details.</p>
+  </div>
+
+  <!-- Upload Area -->
+  <div class="upload-area" *ngIf="!result" (click)="fileInput.click()">
+    <img *ngIf="previewUrl" [src]="previewUrl" class="preview-img" alt="preview" />
+    <div *ngIf="!previewUrl" class="upload-placeholder">
+      <span class="upload-icon">📄</span>
+      <span class="upload-text">Tap to select image or PDF</span>
+      <span class="upload-hint">Supports JPG, PNG, PDF</span>
+    </div>
+    <div *ngIf="selectedFile && !previewUrl" class="file-name">
+      📎 {{ selectedFile.name }}
+    </div>
+  </div>
+  <input #fileInput type="file" accept="image/*,.pdf" style="display:none"
+         (change)="onFileSelected($event)" />
+
+  <!-- Error -->
+  <div class="error-msg" *ngIf="error">{{ error }}</div>
+
+  <!-- Scan Button -->
+  <button class="scan-btn" *ngIf="selectedFile && !result && !scanning"
+          (click)="scan()">
+    🔍 Scan Document
+  </button>
+
+  <!-- Loading -->
+  <div class="scanning-state" *ngIf="scanning">
+    <div class="spinner"></div>
+    <p>AI is reading your document...</p>
+  </div>
+
+  <!-- Results -->
+  <div class="results-card" *ngIf="result">
+    <div class="results-header">
+      <h4>📋 Extracted Loan Details</h4>
+      <span class="confidence">Confidence: {{ confidenceLabel(result.confidence) }}</span>
+    </div>
+
+    <div class="result-row">
+      <span class="label">Loan Type</span>
+      <span class="value">{{ loanTypeLabel(result.loanType) }}</span>
+    </div>
+    <div class="result-row" *ngIf="result.lenderName">
+      <span class="label">Lender</span>
+      <span class="value">{{ result.lenderName }}</span>
+    </div>
+    <div class="result-row" *ngIf="result.principalAmount">
+      <span class="label">Principal</span>
+      <span class="value">${{ result.principalAmount | number:'1.2-2' }}</span>
+    </div>
+    <div class="result-row" *ngIf="result.interestRate">
+      <span class="label">Interest Rate</span>
+      <span class="value">{{ result.interestRate }}% / year</span>
+    </div>
+    <div class="result-row" *ngIf="result.termMonths">
+      <span class="label">Term</span>
+      <span class="value">{{ result.termMonths }} months</span>
+    </div>
+    <div class="result-row" *ngIf="result.monthlyPayment">
+      <span class="label">Monthly Payment</span>
+      <span class="value">${{ result.monthlyPayment | number:'1.2-2' }}</span>
+    </div>
+    <div class="result-row" *ngIf="result.startDate">
+      <span class="label">Start Date</span>
+      <span class="value">{{ result.startDate }}</span>
+    </div>
+    <div class="result-row" *ngIf="result.accountNumber">
+      <span class="label">Account #</span>
+      <span class="value">{{ result.accountNumber }}</span>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn-reset" (click)="reset()">Scan Another</button>
+    </div>
+  </div>
+
+</div>

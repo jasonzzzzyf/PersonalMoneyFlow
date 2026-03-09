@@ -8,8 +8,6 @@ import com.jason.personalmoneyflow.model.entity.Transaction;
 import com.jason.personalmoneyflow.repository.CustomCategoryRepository;
 import com.jason.personalmoneyflow.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +17,8 @@ import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,10 +49,17 @@ public class TransactionService {
         return mapToResponse(saved, category);
     }
 
-    public java.util.List<TransactionResponse> getTransactions(Long userId) {
-        return transactionRepository.findByUserId(userId, Pageable.unpaged())
-                .map(this::mapToResponseWithCategory)
-                .getContent();
+    public List<TransactionResponse> getTransactions(Long userId) {
+        List<Transaction> transactions = transactionRepository.findByUserIdOrderByTransactionDateDesc(userId);
+        Set<Long> categoryIds = transactions.stream()
+                .map(Transaction::getCategoryId)
+                .collect(Collectors.toSet());
+        Map<Long, CustomCategory> categoryMap = categoryRepository.findAllById(categoryIds)
+                .stream()
+                .collect(Collectors.toMap(CustomCategory::getId, Function.identity()));
+        return transactions.stream()
+                .map(t -> mapToResponse(t, categoryMap.get(t.getCategoryId())))
+                .collect(Collectors.toList());
     }
 
     public TransactionResponse getTransactionById(Long userId, Long transactionId) {

@@ -34,11 +34,6 @@ public class TransactionRequest {
     @Size(max = 500)
     private String note;
 
-    // Reserved for future extension if needed
-    private String description;
-
-    private String notes;
-
     private Boolean isRecurring = false;
 
     private String recurringFrequency;

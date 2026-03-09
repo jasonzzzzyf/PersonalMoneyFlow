@@ -1,6 +1,6 @@
-<!-- analytics.component.html - Charts 图表分析 -->
+<!-- analytics.component.html -->
 <div class="analytics-container">
-  
+
   <!-- Monthly Summary Card -->
   <div class="summary-card">
     <h2>This Month</h2>
@@ -24,34 +24,40 @@
 
   <!-- Charts Section -->
   <div class="charts-section">
-    
-    <!-- Income vs Expense Chart -->
+
+    <!-- Bar Chart: Income vs Expense -->
     <div class="chart-card">
-      <h3>Income vs Expense</h3>
-      <div class="chart-placeholder">
-        <div class="placeholder-icon">📊</div>
-        <p>Bar chart showing income vs expense for the last 6 months</p>
-        <small>Chart.js integration coming soon</small>
+      <h3>Income vs Expense <span class="chart-subtitle">Last 6 months</span></h3>
+      <div class="chart-wrapper">
+        <canvas baseChart
+          [data]="barChartData"
+          [options]="barChartOptions"
+          type="bar">
+        </canvas>
       </div>
     </div>
 
-    <!-- Category Breakdown -->
+    <!-- Pie Chart: Expense by Category -->
     <div class="chart-card">
-      <h3>Expense by Category</h3>
-      <div class="chart-placeholder">
-        <div class="placeholder-icon">🥧</div>
-        <p>Pie chart showing expense breakdown by category</p>
-        <small>Chart.js integration coming soon</small>
+      <h3>Expense Breakdown <span class="chart-subtitle">By category</span></h3>
+      <div class="chart-wrapper">
+        <canvas baseChart
+          [data]="pieChartData"
+          [options]="pieChartOptions"
+          type="pie">
+        </canvas>
       </div>
     </div>
 
-    <!-- Spending Trends -->
-    <div class="chart-card">
-      <h3>Spending Trends</h3>
-      <div class="chart-placeholder">
-        <div class="placeholder-icon">📈</div>
-        <p>Line chart showing weekly spending trends</p>
-        <small>Chart.js integration coming soon</small>
+    <!-- Line Chart: Weekly Spending Trends -->
+    <div class="chart-card chart-card--wide">
+      <h3>Weekly Spending Trends <span class="chart-subtitle">This month</span></h3>
+      <div class="chart-wrapper">
+        <canvas baseChart
+          [data]="lineChartData"
+          [options]="lineChartOptions"
+          type="line">
+        </canvas>
       </div>
     </div>
 
@@ -62,23 +68,25 @@
     <div class="stat-card">
       <div class="stat-icon">💰</div>
       <div class="stat-info">
-        <span class="stat-value">$5,000</span>
-        <span class="stat-label">Avg Monthly Income</span>
+        <span class="stat-value">${{ monthlyIncome.toFixed(0) }}</span>
+        <span class="stat-label">Monthly Income</span>
       </div>
     </div>
 
     <div class="stat-card">
       <div class="stat-icon">💸</div>
       <div class="stat-info">
-        <span class="stat-value">$3,100</span>
-        <span class="stat-label">Avg Monthly Expense</span>
+        <span class="stat-value">${{ monthlyExpense.toFixed(0) }}</span>
+        <span class="stat-label">Monthly Expense</span>
       </div>
     </div>
 
     <div class="stat-card">
       <div class="stat-icon">📈</div>
       <div class="stat-info">
-        <span class="stat-value">+15%</span>
+        <span class="stat-value" [class.positive]="savingsRate >= 0" [class.negative]="savingsRate < 0">
+          {{ savingsRate }}%
+        </span>
         <span class="stat-label">Savings Rate</span>
       </div>
     </div>
@@ -86,7 +94,9 @@
     <div class="stat-card">
       <div class="stat-icon">🎯</div>
       <div class="stat-info">
-        <span class="stat-value">$1,900</span>
+        <span class="stat-value" [class.positive]="netAmount >= 0" [class.negative]="netAmount < 0">
+          ${{ netAmount.toFixed(0) }}
+        </span>
         <span class="stat-label">Monthly Savings</span>
       </div>
     </div>
