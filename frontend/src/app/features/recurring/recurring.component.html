@@ -1,0 +1,138 @@
+<!-- recurring.component.html -->
+<div class="recurring-container">
+
+  <!-- Header -->
+  <div class="page-header">
+    <h2>🔄 Recurring Transactions</h2>
+    <p class="subtitle">Auto-executed on schedule every day at midnight</p>
+  </div>
+
+  <!-- Error -->
+  <div class="error-msg" *ngIf="error">{{ error }}</div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="loading">Loading...</div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- Income Section -->
+    <div class="section-title" *ngIf="incomeItems().length > 0">
+      <span class="dot income"></span> Income
+    </div>
+    <div class="item-card" *ngFor="let item of incomeItems()" [class.inactive]="!item.isActive">
+      <div class="item-row">
+        <span class="type-badge income">+</span>
+        <div class="item-info">
+          <span class="desc">{{ item.description }}</span>
+          <span class="meta">
+            {{ item.categoryName || 'Uncategorized' }} · {{ freqLabel(item.frequency) }}
+          </span>
+        </div>
+        <div class="item-right">
+          <span class="amount income">${{ item.amount.toFixed(2) }}</span>
+          <span class="next-date">Next: {{ nextDateLabel(item.nextExecutionDate) }}</span>
+        </div>
+        <div class="item-actions">
+          <button class="toggle-btn" [class.paused]="!item.isActive"
+                  (click)="toggleActive(item)" [title]="item.isActive ? 'Pause' : 'Resume'">
+            {{ item.isActive ? '⏸' : '▶' }}
+          </button>
+          <button class="delete-btn" (click)="deleteItem(item.id)">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expense Section -->
+    <div class="section-title" *ngIf="expenseItems().length > 0">
+      <span class="dot expense"></span> Expenses
+    </div>
+    <div class="item-card" *ngFor="let item of expenseItems()" [class.inactive]="!item.isActive">
+      <div class="item-row">
+        <span class="type-badge expense">−</span>
+        <div class="item-info">
+          <span class="desc">{{ item.description }}</span>
+          <span class="meta">
+            {{ item.categoryName || 'Uncategorized' }} · {{ freqLabel(item.frequency) }}
+          </span>
+        </div>
+        <div class="item-right">
+          <span class="amount expense">-${{ item.amount.toFixed(2) }}</span>
+          <span class="next-date">Next: {{ nextDateLabel(item.nextExecutionDate) }}</span>
+        </div>
+        <div class="item-actions">
+          <button class="toggle-btn" [class.paused]="!item.isActive"
+                  (click)="toggleActive(item)" [title]="item.isActive ? 'Pause' : 'Resume'">
+            {{ item.isActive ? '⏸' : '▶' }}
+          </button>
+          <button class="delete-btn" (click)="deleteItem(item.id)">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty -->
+    <div class="empty-state" *ngIf="items.length === 0">
+      <p>🔄 No recurring transactions yet.</p>
+      <p>Tap <strong>+</strong> to add salary, rent, subscriptions, etc.</p>
+    </div>
+
+  </ng-container>
+
+  <!-- Add Modal -->
+  <div class="modal-overlay" *ngIf="showAddForm" (click)="showAddForm = false">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <h3>Add Recurring Transaction</h3>
+
+      <div class="form-group">
+        <label>Type</label>
+        <div class="type-toggle">
+          <button [class.active]="newItem.transactionType === 'INCOME'"
+                  (click)="newItem.transactionType = 'INCOME'">Income</button>
+          <button [class.active]="newItem.transactionType === 'EXPENSE'"
+                  (click)="newItem.transactionType = 'EXPENSE'">Expense</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <input type="text" [(ngModel)]="newItem.description" placeholder="e.g. Monthly Rent" />
+      </div>
+
+      <div class="form-group">
+        <label>Category</label>
+        <select [(ngModel)]="newItem.categoryId">
+          <option [value]="0" disabled>Select...</option>
+          <option *ngFor="let c of categories" [value]="c.id">{{ c.categoryName }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Amount ($)</label>
+        <input type="number" [(ngModel)]="newItem.amount" placeholder="0.00" min="0.01" />
+      </div>
+
+      <div class="form-group">
+        <label>Frequency</label>
+        <select [(ngModel)]="newItem.frequency">
+          <option value="DAILY">Daily</option>
+          <option value="WEEKLY">Weekly</option>
+          <option value="MONTHLY">Monthly</option>
+          <option value="YEARLY">Yearly</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Start Date</label>
+        <input type="date" [(ngModel)]="newItem.startDate" />
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-cancel" (click)="showAddForm = false">Cancel</button>
+        <button class="btn-save" (click)="saveItem()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAB -->
+  <button class="fab" (click)="openAddForm()">+</button>
+
+</div>

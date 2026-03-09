@@ -1,4 +1,4 @@
-// app-routing.module.ts - 5个Tab设计
+// app-routing.module.ts
 
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
@@ -10,10 +10,12 @@ const routes: Routes = [
     redirectTo: '/transactions',
     pathMatch: 'full'
   },
+  // ── Auth ─────────────────────────────────────────────────────
   {
     path: 'auth',
     loadChildren: () => import('./features/auth/auth.module').then(m => m.AuthModule)
   },
+  // ── Core tabs ────────────────────────────────────────────────
   {
     path: 'transactions',
     loadChildren: () => import('./features/transactions/transactions.module').then(m => m.TransactionsModule),
@@ -34,21 +36,37 @@ const routes: Routes = [
     loadChildren: () => import('./features/profile/profile.module').then(m => m.ProfileModule),
     canActivate: [AuthGuard]
   },
-  // Redirect old routes
+  // ── Phase 2 features ─────────────────────────────────────────
   {
     path: 'dashboard',
-    redirectTo: '/transactions',
-    pathMatch: 'full'
+    loadChildren: () => import('./features/dashboard/dashboard.module').then(m => m.DashboardModule),
+    canActivate: [AuthGuard]
   },
   {
-    path: 'networth',
-    redirectTo: '/investments#networth',
-    pathMatch: 'full'
+    path: 'budget',
+    loadChildren: () => import('./features/budget/budget.module').then(m => m.BudgetModule),
+    canActivate: [AuthGuard]
   },
+  {
+    path: 'recurring',
+    loadChildren: () => import('./features/recurring/recurring.module').then(m => m.RecurringModule),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'reminders',
+    loadChildren: () => import('./features/reminders/reminders.module').then(m => m.RemindersModule),
+    canActivate: [AuthGuard]
+  },
+  // ── Other ─────────────────────────────────────────────────────
   {
     path: 'categories',
     loadChildren: () => import('./features/categories/categories.module').then(m => m.CategoriesModule),
     canActivate: [AuthGuard]
+  },
+  {
+    path: 'networth',
+    redirectTo: '/investments',
+    pathMatch: 'full'
   },
   {
     path: '**',

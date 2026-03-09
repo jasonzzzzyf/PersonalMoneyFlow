@@ -1,4 +1,4 @@
-// CategoryController.java - 临时允许公开访问
+// CategoryController.java
 
 package com.jason.personalmoneyflow.controller;
 
@@ -42,22 +42,22 @@ public class CategoryController {
 
     @PostMapping
     public ResponseEntity<CategoryResponse> createCategory(
-            @Valid @RequestBody CategoryRequest request,
-            HttpServletRequest requestRaw
+            @Valid @RequestBody CategoryRequest categoryRequest,
+            HttpServletRequest request
     ) {
-        Long userId = jwtTokenProvider.getUserIdFromRequest(requestRaw);
-        CategoryResponse category = categoryService.createCategory(userId, request);
+        Long userId = jwtTokenProvider.getUserIdFromRequest(request);
+        CategoryResponse category = categoryService.createCategory(userId, categoryRequest);
         return ResponseEntity.ok(category);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<CategoryResponse> updateCategory(
             @PathVariable Long id,
-            @Valid @RequestBody CategoryRequest request,
-            HttpServletRequest requestRaw
+            @Valid @RequestBody CategoryRequest categoryRequest,
+            HttpServletRequest request
     ) {
-        Long userId = jwtTokenProvider.getUserIdFromRequest(requestRaw);
-        CategoryResponse category = categoryService.updateCategory(userId, id, request);
+        Long userId = jwtTokenProvider.getUserIdFromRequest(request);
+        CategoryResponse category = categoryService.updateCategory(userId, id, categoryRequest);
         return ResponseEntity.ok(category);
     }
 

@@ -71,30 +71,24 @@
     font-size: 16px;
     font-weight: 600;
     color: #333;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
   }
 
-  .chart-placeholder {
-    padding: 40px 20px;
-    background: #f9f9f9;
-    border-radius: 8px;
-    text-align: center;
+  .chart-subtitle {
+    font-size: 12px;
+    font-weight: 400;
     color: #999;
+  }
 
-    .placeholder-icon {
-      font-size: 48px;
-      margin-bottom: 12px;
-    }
+  .chart-wrapper {
+    position: relative;
+    height: 220px;
+  }
 
-    p {
-      margin: 0 0 8px 0;
-      font-size: 14px;
-      color: #666;
-    }
-
-    small {
-      font-size: 12px;
-      color: #999;
-    }
+  &.chart-card--wide .chart-wrapper {
+    height: 180px;
   }
 }
 
@@ -134,6 +128,9 @@
       font-size: 18px;
       font-weight: 700;
       color: #333;
+
+      &.positive { color: #4CAF50; }
+      &.negative { color: #F44336; }
     }
 
     .stat-label {

@@ -1,12 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AuthService } from '../../core/auth/auth.service';
-
-interface DashboardStats {
-  totalIncome: number;
-  totalExpense: number;
-  netSavings: number;
-  portfolioValue: number;
-}
+import { DashboardService, DashboardData } from '../../shared/services/dashboard.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -14,49 +7,59 @@ interface DashboardStats {
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
-  
-  stats: DashboardStats = {
-    totalIncome: 0,
-    totalExpense: 0,
-    netSavings: 0,
-    portfolioValue: 0
-  };
 
-  recentTransactions: any[] = [];
+  data: DashboardData | null = null;
   loading = false;
+  error = '';
 
-  constructor(
-    private authService: AuthService
-  ) { }
+  constructor(private dashboardService: DashboardService) {}
 
   ngOnInit(): void {
-    this.loadDashboardData();
+    this.load();
   }
 
-  loadDashboardData(): void {
+  load(): void {
     this.loading = true;
-    
-    // TODO: Load real data from API
-    // For now, show placeholder data
-    
-    this.stats = {
-      totalIncome: 5000,
-      totalExpense: 0,
-      netSavings: 5000,
-      portfolioValue: 0
-    };
-
-    this.recentTransactions = [
-      {
-        id: 1,
-        type: 'INCOME',
-        category: 'Salary',
-        amount: 5000,
-        date: new Date(),
-        description: 'December Salary'
+    this.error = '';
+    this.dashboardService.getDashboard().subscribe({
+      next: (d) => {
+        this.data = d;
+        this.loading = false;
+      },
+      error: () => {
+        this.error = 'Failed to load dashboard data';
+        this.loading = false;
       }
-    ];
+    });
+  }
 
-    this.loading = false;
+  netWorthClass(): string {
+    return (this.data?.netWorth ?? 0) >= 0 ? 'positive' : 'negative';
+  }
+
+  transactionTypeIcon(type: string): string {
+    return type === 'INCOME' ? '↑' : '↓';
+  }
+
+  transactionTypeClass(type: string): string {
+    return type === 'INCOME' ? 'income' : 'expense';
+  }
+
+  formatDate(dateStr: string): string {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  dueDateLabel(daysUntilDue: number): string {
+    if (daysUntilDue < 0)   return `${Math.abs(daysUntilDue)}d overdue`;
+    if (daysUntilDue === 0) return 'Due today';
+    return `In ${daysUntilDue}d`;
+  }
+
+  dueDateClass(daysUntilDue: number): string {
+    if (daysUntilDue < 0)  return 'overdue';
+    if (daysUntilDue <= 3) return 'urgent';
+    return 'normal';
   }
 }
