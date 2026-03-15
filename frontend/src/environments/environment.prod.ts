@@ -13,9 +13,9 @@
 
 export const environment = {
   production: true,
-  demoMode: true,
-  apiUrl: '',
-  pythonApiUrl: '',
+  demoMode: false,
+  apiUrl: 'https://BACKEND_RENDER_URL/api/v1',
+  pythonApiUrl: 'https://BACKEND_RENDER_URL/stock-api',
   enableDebugMode: false,
   tokenKey: 'auth_token',
   userKey: 'current_user'

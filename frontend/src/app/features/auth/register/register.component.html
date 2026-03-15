@@ -4,6 +4,7 @@
       <div class="logo-icon">💰</div>
       <h1>PersonalMoneyFlow</h1>
       <p>Track your finances with ease</p>
+      <p *ngIf="demoMode">Register creates a local demo account and opens the dashboard.</p>
     </div>
 
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">

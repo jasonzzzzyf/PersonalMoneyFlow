@@ -1,6 +1,7 @@
 <!-- app.component.html -->
 
 <div class="app-container">
+  <div class="demo-badge" *ngIf="demoMode">Demo Mode</div>
   <router-outlet></router-outlet>
   
   <app-bottom-nav *ngIf="showBottomNav"></app-bottom-nav>

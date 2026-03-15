@@ -1,7 +1,7 @@
 // profile.component.ts
 
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-profile',
@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
 })
 export class ProfileComponent {
 
-  constructor(private router: Router) {}
+  constructor(private authService: AuthService) {}
 
   changePassword(): void {
     // TODO: 实现修改密码功能
@@ -38,10 +38,8 @@ export class ProfileComponent {
   }
 
   logout(): void {
-    // TODO: 实现登出逻辑
     if (confirm('Are you sure you want to logout?')) {
-      localStorage.removeItem('token');
-      this.router.navigate(['/auth/login']);
+      this.authService.logout();
     }
   }
 }

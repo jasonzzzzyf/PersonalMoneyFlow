@@ -4,6 +4,7 @@
       <div class="logo-icon">💰</div>
       <h1>PersonalMoneyFlow</h1>
       <p>Track your finances with ease</p>
+      <p *ngIf="demoMode">Any valid email and password will sign you into the demo.</p>
     </div>
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">

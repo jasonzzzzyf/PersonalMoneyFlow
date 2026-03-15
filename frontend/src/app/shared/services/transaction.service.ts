@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Transaction, TransactionRequest, CalendarData } from '@shared/models/models';
 import { environment } from '../../../environments/environment';
+import { DemoDataService } from '../../core/demo/demo-data.service';
 
 export { Transaction };
 
@@ -13,9 +14,26 @@ export { Transaction };
 export class TransactionService {
   private apiUrl = `${environment.apiUrl}/transactions`;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private demoDataService: DemoDataService
+  ) {}
 
   getTransactions(page: number = 0, size: number = 20): Observable<any> {
+    if (environment.demoMode) {
+      const transactions = this.demoDataService.getTransactions();
+      const start = page * size;
+      const content = transactions.slice(start, start + size);
+
+      return of({
+        content,
+        totalElements: transactions.length,
+        totalPages: Math.ceil(transactions.length / size),
+        size,
+        number: page
+      });
+    }
+
     const params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString())
@@ -26,31 +44,53 @@ export class TransactionService {
   }
 
   getTransaction(id: number): Observable<Transaction> {
+    if (environment.demoMode) {
+      return of(this.demoDataService.getTransaction(id) as Transaction);
+    }
     return this.http.get<Transaction>(`${this.apiUrl}/${id}`);
   }
 
   createTransaction(request: TransactionRequest): Observable<Transaction> {
+    if (environment.demoMode) {
+      return of(this.demoDataService.createTransaction(request));
+    }
     return this.http.post<Transaction>(this.apiUrl, request);
   }
 
   updateTransaction(id: number, request: TransactionRequest): Observable<Transaction> {
+    if (environment.demoMode) {
+      return of(this.demoDataService.updateTransaction(id, request));
+    }
     return this.http.put<Transaction>(`${this.apiUrl}/${id}`, request);
   }
 
   deleteTransaction(id: number): Observable<void> {
+    if (environment.demoMode) {
+      this.demoDataService.deleteTransaction(id);
+      return of(void 0);
+    }
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
   getCalendarData(yearMonth: string): Observable<CalendarData> {
+    if (environment.demoMode) {
+      return of(this.demoDataService.getCalendarData(yearMonth));
+    }
     const params = new HttpParams().set('month', yearMonth);
     return this.http.get<CalendarData>(`${this.apiUrl}/calendar`, { params });
   }
 
   getTransactionsByDate(date: string): Observable<Transaction[]> {
+    if (environment.demoMode) {
+      return of(this.demoDataService.getTransactionsByDate(date));
+    }
     return this.http.get<Transaction[]>(`${this.apiUrl}/date/${date}`);
   }
 
   getMonthlySummary(yearMonth: string): Observable<any> {
+    if (environment.demoMode) {
+      return of(this.demoDataService.getMonthlySummary(yearMonth));
+    }
     const params = new HttpParams().set('month', yearMonth);
     return this.http.get<any>(`${this.apiUrl}/summary`, { params });
   }
@@ -59,6 +99,10 @@ export class TransactionService {
    * 🆕 获取指定月份的所有交易（用于日历视图）
    */
   getTransactionsByMonth(year: number, month: number): Observable<Transaction[]> {
+    if (environment.demoMode) {
+      return of(this.demoDataService.getTransactionsByMonth(year, month));
+    }
+
     console.log('TransactionService: 请求', year, '年', month, '月的交易');
     
     // 构建日期范围：YYYY-MM-01 到 YYYY-MM-31

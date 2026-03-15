@@ -1,8 +1,8 @@
 // auth.service.ts - 认证服务（修复版）
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 
@@ -32,6 +32,7 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
+  currencyCode?: string;
 }
 
 @Injectable({
@@ -72,22 +73,21 @@ export class AuthService {
       throw new Error('Invalid login parameters');
     }
 
+    if (environment.demoMode) {
+      const response = this.buildDemoAuthResponse({
+        id: 1,
+        email: loginData.email,
+        firstName: this.nameFromEmail(loginData.email),
+        lastName: 'Demo',
+        currencyCode: 'CAD'
+      });
+      this.persistAuth(response);
+      return of(response);
+    }
+
     return this.http.post<AuthResponse>(`${this.baseUrl}/auth/login`, loginData)
       .pipe(
-        tap(response => {
-          // 保存 token
-          localStorage.setItem(environment.tokenKey, response.token);
-          
-          // 保存用户信息
-          const user: User = {
-            id: response.userId,
-            email: response.email,
-            firstName: response.firstName,
-            lastName: response.lastName
-          };
-          localStorage.setItem(environment.userKey, JSON.stringify(user));
-          this.currentUserSubject.next(user);
-        })
+        tap(response => this.persistAuth(response))
       );
   }
 
@@ -95,21 +95,21 @@ export class AuthService {
    * 注册
    */
   register(data: RegisterRequest): Observable<AuthResponse> {
+    if (environment.demoMode) {
+      const response = this.buildDemoAuthResponse({
+        id: 1,
+        email: data.email,
+        firstName: data.firstName,
+        lastName: data.lastName || 'Demo',
+        currencyCode: 'CAD'
+      });
+      this.persistAuth(response);
+      return of(response);
+    }
+
     return this.http.post<AuthResponse>(`${this.baseUrl}/auth/register`, data)
       .pipe(
-        tap(response => {
-          // 注册成功后自动登录
-          localStorage.setItem(environment.tokenKey, response.token);
-          
-          const user: User = {
-            id: response.userId,
-            email: response.email,
-            firstName: response.firstName,
-            lastName: response.lastName
-          };
-          localStorage.setItem(environment.userKey, JSON.stringify(user));
-          this.currentUserSubject.next(user);
-        })
+        tap(response => this.persistAuth(response))
       );
   }
 
@@ -134,13 +134,16 @@ export class AuthService {
    * 检查是否已登录
    */
   isLoggedIn(): boolean {
-    return !!this.getToken();
+    return !!this.getToken() && !!this.currentUserValue;
   }
 
   /**
    * 获取当前用户信息
    */
   getCurrentUser(): Observable<User> {
+    if (environment.demoMode && this.currentUserValue) {
+      return of(this.currentUserValue);
+    }
     return this.http.get<User>(`${this.baseUrl}/auth/me`);
   }
 
@@ -148,9 +151,46 @@ export class AuthService {
    * 修改密码
    */
   changePassword(oldPassword: string, newPassword: string): Observable<any> {
+    if (environment.demoMode) {
+      return of({ message: 'Password updated in demo mode' });
+    }
     return this.http.put(`${this.baseUrl}/auth/password`, {
       oldPassword,
       newPassword
     });
+  }
+
+  private persistAuth(response: AuthResponse): void {
+    localStorage.setItem(environment.tokenKey, response.token);
+
+    const user: User = {
+      id: response.userId,
+      email: response.email,
+      firstName: response.firstName,
+      lastName: response.lastName
+    };
+
+    localStorage.setItem(environment.userKey, JSON.stringify(user));
+    this.currentUserSubject.next(user);
+  }
+
+  private buildDemoAuthResponse(user: User): AuthResponse {
+    return {
+      token: 'demo-token',
+      type: 'Bearer',
+      userId: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName
+    };
+  }
+
+  private nameFromEmail(email: string): string {
+    const [namePart] = email.split('@');
+    if (!namePart) {
+      return 'Demo';
+    }
+
+    return namePart.charAt(0).toUpperCase() + namePart.slice(1);
   }
 }

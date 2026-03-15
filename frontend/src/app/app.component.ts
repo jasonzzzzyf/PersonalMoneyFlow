@@ -4,6 +4,7 @@ import { Component } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { AuthService } from './core/auth/auth.service';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -11,8 +12,9 @@ import { AuthService } from './core/auth/auth.service';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'PersonalMoneyManagement';
+  title = 'PersonalMoneyFlow';
   showBottomNav = true;
+  readonly demoMode = environment.demoMode;
 
   constructor(
     private router: Router,
