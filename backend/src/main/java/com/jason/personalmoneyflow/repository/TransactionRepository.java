@@ -16,6 +16,8 @@ import java.util.Optional;
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
     
     Page<Transaction> findByUserId(Long userId, Pageable pageable);
+
+    List<Transaction> findByUserIdOrderByTransactionDateDesc(Long userId);
     
     Optional<Transaction> findByIdAndUserId(Long id, Long userId);
     

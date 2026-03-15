@@ -1,54 +1,121 @@
+<!-- dashboard.component.html -->
 <div class="dashboard-container">
-  <h1>Dashboard</h1>
 
-  <div class="stats-grid" *ngIf="!loading">
-    <div class="stat-card income">
-      <h3>Total Income</h3>
-      <p class="amount">${{ stats.totalIncome | number:'1.2-2' }}</p>
-    </div>
-
-    <div class="stat-card expense">
-      <h3>Total Expense</h3>
-      <p class="amount">${{ stats.totalExpense | number:'1.2-2' }}</p>
-    </div>
-
-    <div class="stat-card savings">
-      <h3>Net Savings</h3>
-      <p class="amount">${{ stats.netSavings | number:'1.2-2' }}</p>
-    </div>
-
-    <div class="stat-card portfolio">
-      <h3>Portfolio Value</h3>
-      <p class="amount">${{ stats.portfolioValue | number:'1.2-2' }}</p>
-    </div>
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Loading your finances...</p>
   </div>
 
-  <div class="recent-transactions" *ngIf="!loading">
-    <h2>Recent Transactions</h2>
-    <table *ngIf="recentTransactions.length > 0">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Category</th>
-          <th>Description</th>
-          <th>Amount</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let transaction of recentTransactions" 
-            [class.income]="transaction.type === 'INCOME'"
-            [class.expense]="transaction.type === 'EXPENSE'">
-          <td>{{ transaction.date | date:'short' }}</td>
-          <td>{{ transaction.category }}</td>
-          <td>{{ transaction.description }}</td>
-          <td>{{ transaction.amount | number:'1.2-2' }}</td>
-        </tr>
-      </tbody>
-    </table>
-    <p *ngIf="recentTransactions.length === 0">No transactions yet.</p>
+  <!-- Error -->
+  <div class="error-state" *ngIf="error && !loading">
+    <p>{{ error }}</p>
+    <button (click)="load()">Retry</button>
   </div>
 
-  <div class="loading" *ngIf="loading">
-    <p>Loading...</p>
-  </div>
+  <ng-container *ngIf="data && !loading">
+
+    <!-- Net Worth Hero -->
+    <div class="hero-card">
+      <p class="hero-label">Total Net Worth</p>
+      <h1 class="hero-value" [class]="netWorthClass()">
+        ${{ (data.netWorth | number:'1.2-2') || '0.00' }}
+      </h1>
+      <div class="savings-pill">
+        <span>💰 Savings Rate:</span>
+        <strong>{{ data.savingsRatePercent }}%</strong>
+      </div>
+    </div>
+
+    <!-- Monthly Summary -->
+    <div class="summary-row">
+      <div class="summary-card income">
+        <span class="s-label">Income</span>
+        <span class="s-value">+${{ data.monthlyIncome | number:'1.0-0' }}</span>
+      </div>
+      <div class="summary-card expense">
+        <span class="s-label">Expense</span>
+        <span class="s-value">-${{ data.monthlyExpense | number:'1.0-0' }}</span>
+      </div>
+      <div class="summary-card net" [class.positive]="data.monthlyNet >= 0" [class.negative]="data.monthlyNet < 0">
+        <span class="s-label">Net</span>
+        <span class="s-value">{{ data.monthlyNet >= 0 ? '+' : '' }}${{ data.monthlyNet | number:'1.0-0' }}</span>
+      </div>
+    </div>
+
+    <!-- Budget Alerts -->
+    <div class="section-card" *ngIf="data.budgetAlerts && data.budgetAlerts.length > 0">
+      <div class="section-header">
+        <h3>⚠️ Budget Alerts</h3>
+        <a routerLink="/budget" class="view-all">View all</a>
+      </div>
+      <div class="alert-row" *ngFor="let b of data.budgetAlerts">
+        <span class="alert-name">{{ b.categoryName }}</span>
+        <div class="alert-bar-bg">
+          <div class="alert-bar-fill"
+               [style.width.%]="b.percentage > 100 ? 100 : b.percentage"
+               [style.background]="b.percentage >= 100 ? '#F44336' : '#FF9800'">
+          </div>
+        </div>
+        <span class="alert-pct" [style.color]="b.percentage >= 100 ? '#F44336' : '#FF9800'">
+          {{ b.percentage | number:'1.0-0' }}%
+        </span>
+      </div>
+    </div>
+
+    <!-- Upcoming Payments -->
+    <div class="section-card" *ngIf="data.upcomingPayments && data.upcomingPayments.length > 0">
+      <div class="section-header">
+        <h3>🔔 Upcoming Bills</h3>
+        <a routerLink="/reminders" class="view-all">View all</a>
+      </div>
+      <div class="payment-row" *ngFor="let p of data.upcomingPayments">
+        <div class="payment-info">
+          <span class="payment-name">{{ p.reminderName }}</span>
+          <span class="payment-due" [class]="dueDateClass(p.daysUntilDue)">
+            {{ dueDateLabel(p.daysUntilDue) }}
+          </span>
+        </div>
+        <span class="payment-amount" *ngIf="p.amount">${{ p.amount | number:'1.0-0' }}</span>
+      </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="section-card" *ngIf="data.recentTransactions && data.recentTransactions.length > 0">
+      <div class="section-header">
+        <h3>📋 Recent Transactions</h3>
+        <a routerLink="/transactions" class="view-all">View all</a>
+      </div>
+      <div class="tx-row" *ngFor="let tx of data.recentTransactions">
+        <span class="tx-badge" [class]="transactionTypeClass(tx.type)">
+          {{ transactionTypeIcon(tx.type) }}
+        </span>
+        <div class="tx-info">
+          <span class="tx-cat">{{ tx.categoryName || 'Uncategorized' }}</span>
+          <span class="tx-date">{{ formatDate(tx.transactionDate) }}</span>
+        </div>
+        <span class="tx-amount" [class]="transactionTypeClass(tx.type)">
+          {{ tx.type === 'INCOME' ? '+' : '-' }}${{ tx.amount | number:'1.2-2' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="quick-links">
+      <a routerLink="/budget" class="quick-link">
+        <span>💰</span><span>Budget</span>
+      </a>
+      <a routerLink="/recurring" class="quick-link">
+        <span>🔄</span><span>Recurring</span>
+      </a>
+      <a routerLink="/reminders" class="quick-link">
+        <span>🔔</span><span>Reminders</span>
+      </a>
+      <a routerLink="/analytics" class="quick-link">
+        <span>📊</span><span>Analytics</span>
+      </a>
+    </div>
+
+  </ng-container>
+
 </div>

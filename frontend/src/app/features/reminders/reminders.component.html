@@ -1,0 +1,110 @@
+<!-- reminders.component.html -->
+<div class="reminders-container">
+
+  <!-- Header -->
+  <div class="page-header">
+    <h2>🔔 Bill Reminders</h2>
+    <p class="subtitle">Never miss a payment</p>
+    <!-- Tab Switcher -->
+    <div class="tab-bar">
+      <button [class.active]="activeTab === 'upcoming'"
+              (click)="activeTab = 'upcoming'">
+        Upcoming
+        <span class="badge" *ngIf="upcomingItems.length > 0">{{ upcomingItems.length }}</span>
+      </button>
+      <button [class.active]="activeTab === 'overdue'"
+              (click)="activeTab = 'overdue'">
+        Overdue
+        <span class="badge urgent" *ngIf="overdueItems.length > 0">{{ overdueItems.length }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="error-msg" *ngIf="error">{{ error }}</div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="loading">Loading reminders...</div>
+
+  <!-- Reminder List -->
+  <div *ngIf="!loading">
+
+    <div class="reminder-card" *ngFor="let item of displayedItems()"
+         [class]="urgencyClass(item)">
+      <div class="reminder-row">
+        <div class="reminder-icon">🔔</div>
+        <div class="reminder-info">
+          <span class="name">{{ item.reminderName }}</span>
+          <span class="due" [class]="urgencyClass(item)">{{ dueDateLabel(item) }}</span>
+          <span class="date-text">{{ item.dueDate }}</span>
+          <span class="recurrence" *ngIf="item.recurrence !== 'ONCE'">
+            ↺ {{ item.recurrence | titlecase }}
+          </span>
+        </div>
+        <div class="reminder-right">
+          <span class="amount" *ngIf="item.amount">${{ item.amount.toFixed(2) }}</span>
+          <div class="actions">
+            <button class="pay-btn" (click)="markPaid(item)">✓ Paid</button>
+            <button class="del-btn" (click)="deleteReminder(item.id)">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes" *ngIf="item.notes">📝 {{ item.notes }}</div>
+    </div>
+
+    <!-- Empty -->
+    <div class="empty-state" *ngIf="displayedItems().length === 0">
+      <p *ngIf="activeTab === 'upcoming'">✅ No upcoming bills!</p>
+      <p *ngIf="activeTab === 'overdue'">🎉 No overdue payments!</p>
+      <p *ngIf="activeTab === 'upcoming'">Tap <strong>+</strong> to add a reminder.</p>
+    </div>
+
+  </div>
+
+  <!-- Add Modal -->
+  <div class="modal-overlay" *ngIf="showAddForm" (click)="showAddForm = false">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <h3>Add Reminder</h3>
+
+      <div class="form-group">
+        <label>Bill Name</label>
+        <input type="text" [(ngModel)]="newReminder.reminderName"
+               placeholder="e.g. Electricity Bill" />
+      </div>
+
+      <div class="form-group">
+        <label>Amount ($) — optional</label>
+        <input type="number" [(ngModel)]="newReminder.amount" placeholder="0.00" min="0" />
+      </div>
+
+      <div class="form-group">
+        <label>Due Date</label>
+        <input type="date" [(ngModel)]="newReminder.dueDate" />
+      </div>
+
+      <div class="form-group">
+        <label>Recurrence</label>
+        <select [(ngModel)]="newReminder.recurrence">
+          <option value="ONCE">One-time</option>
+          <option value="MONTHLY">Monthly</option>
+          <option value="YEARLY">Yearly</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Notes — optional</label>
+        <input type="text" [(ngModel)]="newReminder.notes" placeholder="Any notes..." />
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-cancel" (click)="showAddForm = false">Cancel</button>
+        <button class="btn-save" (click)="saveReminder()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAB -->
+  <button class="fab" (click)="openAddForm()">+</button>
+
+</div>

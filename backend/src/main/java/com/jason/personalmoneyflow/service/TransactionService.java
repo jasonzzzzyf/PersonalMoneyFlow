@@ -8,8 +8,6 @@ import com.jason.personalmoneyflow.model.entity.Transaction;
 import com.jason.personalmoneyflow.repository.CustomCategoryRepository;
 import com.jason.personalmoneyflow.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +17,8 @@ import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,68 +30,42 @@ public class TransactionService {
 
     @Transactional
     public TransactionResponse createTransaction(Long userId, TransactionRequest request) {
-        // Validate category belongs to user
         CustomCategory category = categoryRepository.findByIdAndUserId(request.getCategoryId(), userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found or doesn't belong to user"));
 
+        Transaction.TransactionType transactionType =
+                Transaction.TransactionType.valueOf(request.getType());
+
         Transaction transaction = Transaction.builder()
                 .userId(userId)
-                .transactionType(request.getTransactionType())
+                .transactionType(transactionType)
                 .categoryId(request.getCategoryId())
                 .amount(request.getAmount())
                 .transactionDate(request.getTransactionDate())
-                .description(request.getDescription())
-                .notes(request.getNotes())
-                .isRecurring(request.getIsRecurring())
-                .recurringFrequency(request.getRecurringFrequency())
-                .tags(request.getTags())
+                .notes(request.getNote())
                 .build();
 
         Transaction saved = transactionRepository.save(transaction);
         return mapToResponse(saved, category);
     }
 
-    public Page<TransactionResponse> getTransactions(Long userId, Pageable pageable) {
-        return transactionRepository.findByUserId(userId, pageable)
-                .map(this::mapToResponseWithCategory);
+    public List<TransactionResponse> getTransactions(Long userId) {
+        List<Transaction> transactions = transactionRepository.findByUserIdOrderByTransactionDateDesc(userId);
+        Set<Long> categoryIds = transactions.stream()
+                .map(Transaction::getCategoryId)
+                .collect(Collectors.toSet());
+        Map<Long, CustomCategory> categoryMap = categoryRepository.findAllById(categoryIds)
+                .stream()
+                .collect(Collectors.toMap(CustomCategory::getId, Function.identity()));
+        return transactions.stream()
+                .map(t -> mapToResponse(t, categoryMap.get(t.getCategoryId())))
+                .collect(Collectors.toList());
     }
 
     public TransactionResponse getTransactionById(Long userId, Long transactionId) {
         Transaction transaction = transactionRepository.findByIdAndUserId(transactionId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Transaction not found"));
         return mapToResponseWithCategory(transaction);
-    }
-
-    @Transactional
-    public TransactionResponse updateTransaction(Long userId, Long transactionId, TransactionRequest request) {
-        Transaction transaction = transactionRepository.findByIdAndUserId(transactionId, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Transaction not found"));
-
-        // Validate new category if changed
-        if (!transaction.getCategoryId().equals(request.getCategoryId())) {
-            categoryRepository.findByIdAndUserId(request.getCategoryId(), userId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
-        }
-
-        transaction.setTransactionType(request.getTransactionType());
-        transaction.setCategoryId(request.getCategoryId());
-        transaction.setAmount(request.getAmount());
-        transaction.setTransactionDate(request.getTransactionDate());
-        transaction.setDescription(request.getDescription());
-        transaction.setNotes(request.getNotes());
-        transaction.setIsRecurring(request.getIsRecurring());
-        transaction.setRecurringFrequency(request.getRecurringFrequency());
-        transaction.setTags(request.getTags());
-
-        Transaction updated = transactionRepository.save(transaction);
-        return mapToResponseWithCategory(updated);
-    }
-
-    @Transactional
-    public void deleteTransaction(Long userId, Long transactionId) {
-        Transaction transaction = transactionRepository.findByIdAndUserId(transactionId, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Transaction not found"));
-        transactionRepository.delete(transaction);
     }
 
     public Map<String, Object> getMonthlyCalendarData(Long userId, YearMonth yearMonth) {
@@ -167,19 +141,12 @@ public class TransactionService {
     private TransactionResponse mapToResponse(Transaction transaction, CustomCategory category) {
         return TransactionResponse.builder()
                 .id(transaction.getId())
-                .userId(transaction.getUserId())
-                .transactionType(transaction.getTransactionType())
-                .categoryId(transaction.getCategoryId())
-                .categoryName(category.getCategoryName())
                 .amount(transaction.getAmount())
+                .type(transaction.getTransactionType() != null ? transaction.getTransactionType().name() : null)
+                .note(transaction.getNotes())
                 .transactionDate(transaction.getTransactionDate())
-                .description(transaction.getDescription())
-                .notes(transaction.getNotes())
-                .isRecurring(transaction.getIsRecurring())
-                .recurringFrequency(transaction.getRecurringFrequency())
-                .tags(transaction.getTags())
-                .createdAt(transaction.getCreatedAt())
-                .updatedAt(transaction.getUpdatedAt())
+                .categoryId(transaction.getCategoryId())
+                .categoryName(category != null ? category.getCategoryName() : null)
                 .build();
     }
 

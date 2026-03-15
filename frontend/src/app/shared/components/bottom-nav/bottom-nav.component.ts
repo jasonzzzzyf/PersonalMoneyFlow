@@ -1,4 +1,4 @@
-// bottom-nav.component.ts - 5个Tab设计
+// bottom-nav.component.ts
 
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
@@ -21,17 +21,17 @@ export class BottomNavComponent {
   }
 
   isActive(route: string): boolean {
-    const currentUrl = this.router.url;
-    
-    switch(route) {
+    const url = this.router.url;
+
+    switch (route) {
       case 'details':
-        return currentUrl.includes('/transactions') && !currentUrl.includes('/add');
-      case 'charts':
-        return currentUrl.includes('/analytics');
+        return url.includes('/transactions') && !url.includes('/add');
+      case 'budget':
+        return url.includes('/budget') || url.includes('/recurring') || url.includes('/reminders') || url.includes('/dashboard');
       case 'invest':
-        return currentUrl.includes('/investments');
+        return url.includes('/investments');
       case 'profile':
-        return currentUrl.includes('/profile');
+        return url.includes('/profile') || url.includes('/analytics');
       default:
         return false;
     }

@@ -1,6 +1,10 @@
-<!-- networth.component.html - 简化版 Net Worth -->
+<!-- networth.component.html -->
 <div class="networth-container">
-  
+
+  <!-- Loading / Error -->
+  <div class="loading-state" *ngIf="loading">Loading...</div>
+  <div class="error-state" *ngIf="error">{{ error }}</div>
+
   <!-- Net Worth Summary Card -->
   <div class="summary-card">
     <h2>Net Worth</h2>
@@ -26,7 +30,7 @@
       <button class="add-btn" (click)="showAddAssetModal = true">+ Add</button>
     </div>
 
-    <div class="empty-state" *ngIf="assets.length === 0">
+    <div class="empty-state" *ngIf="assets.length === 0 && !loading">
       <p>No assets yet</p>
       <button class="add-button" (click)="showAddAssetModal = true">+ Add Your First Asset</button>
     </div>
@@ -38,7 +42,8 @@
           <div class="item-name">{{ asset.assetName }}</div>
           <div class="item-type">{{ asset.assetType }}</div>
         </div>
-        <div class="item-value">${{ asset.currentValue.toFixed(2) }}</div>
+        <div class="item-value">${{ asset.currentValue | number:'1.2-2' }}</div>
+        <button class="delete-btn" (click)="deleteAsset(asset)" title="Delete">🗑</button>
       </div>
     </div>
   </div>
@@ -50,7 +55,7 @@
       <button class="add-btn" (click)="showAddLoanModal = true">+ Add</button>
     </div>
 
-    <div class="empty-state" *ngIf="liabilities.length === 0">
+    <div class="empty-state" *ngIf="liabilities.length === 0 && !loading">
       <p>No liabilities yet</p>
       <button class="add-button" (click)="showAddLoanModal = true">+ Add Your First Loan</button>
     </div>
@@ -68,26 +73,32 @@
             <span class="progress-text">{{ getLoanProgress(loan) }}% paid</span>
           </div>
         </div>
-        <div class="item-value negative">${{ loan.remainingBalance.toFixed(2) }}</div>
+        <div class="item-value negative">${{ loan.remainingBalance | number:'1.2-2' }}</div>
+        <button class="delete-btn" (click)="deleteLoan(loan)" title="Delete">🗑</button>
       </div>
     </div>
   </div>
 
-  <!-- Simple Modals (Placeholder) -->
-  <div class="modal-overlay" *ngIf="showAddAssetModal" (click)="closeModals()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <h3>Add Asset</h3>
-      <p>Asset form coming soon...</p>
-      <button (click)="closeModals()">Close</button>
+  <!-- AI Loan Scanner Section -->
+  <div class="section ai-scanner-section">
+    <div class="section-header">
+      <h3>🤖 AI Loan Scanner</h3>
     </div>
+    <app-loan-scanner></app-loan-scanner>
   </div>
 
-  <div class="modal-overlay" *ngIf="showAddLoanModal" (click)="closeModals()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <h3>Add Loan</h3>
-      <p>Loan form coming soon...</p>
-      <button (click)="closeModals()">Close</button>
-    </div>
-  </div>
+  <!-- Add Asset Modal -->
+  <app-add-asset-modal
+    *ngIf="showAddAssetModal"
+    (close)="showAddAssetModal = false"
+    (assetCreated)="onAssetCreated($event)">
+  </app-add-asset-modal>
+
+  <!-- Add Loan Modal -->
+  <app-add-loan-modal
+    *ngIf="showAddLoanModal"
+    (close)="showAddLoanModal = false"
+    (loanCreated)="onLoanCreated($event)">
+  </app-add-loan-modal>
 
 </div>

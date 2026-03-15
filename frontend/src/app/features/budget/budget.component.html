@@ -1,0 +1,100 @@
+<!-- budget.component.html -->
+<div class="budget-container">
+
+  <!-- Header Card -->
+  <div class="header-card">
+    <h2>💰 Budget</h2>
+    <div class="month-nav">
+      <button class="nav-btn" (click)="prevMonth()">‹</button>
+      <span class="month-label">{{ monthLabel() }}</span>
+      <button class="nav-btn" (click)="nextMonth()">›</button>
+    </div>
+    <div class="header-totals">
+      <div class="total-item">
+        <span class="label">Total Budget</span>
+        <span class="value">${{ totalBudget().toFixed(0) }}</span>
+      </div>
+      <div class="total-item">
+        <span class="label">Total Spent</span>
+        <span class="value spent">${{ totalSpent().toFixed(0) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="error-msg" *ngIf="error">{{ error }}</div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="loading">Loading budgets...</div>
+
+  <!-- Budget List -->
+  <div class="budgets-list" *ngIf="!loading">
+    <div class="budget-card" *ngFor="let b of budgets">
+      <div class="budget-header">
+        <div class="budget-info">
+          <span class="cat-icon">{{ b.categoryIcon || '💳' }}</span>
+          <span class="cat-name">{{ b.categoryName }}</span>
+        </div>
+        <div class="budget-amounts">
+          <span class="spent">${{ b.spentAmount.toFixed(0) }}</span>
+          <span class="sep"> / </span>
+          <span class="limit">${{ b.budgetAmount.toFixed(0) }}</span>
+        </div>
+        <button class="delete-btn" (click)="deleteBudget(b.id)">✕</button>
+      </div>
+
+      <div class="progress-bg">
+        <div class="progress-fill"
+             [style.width.%]="clampPct(b.percentage)"
+             [style.background]="progressColor(b.percentage)">
+        </div>
+      </div>
+
+      <div class="pct-row" [style.color]="progressColor(b.percentage)">
+        {{ b.percentage.toFixed(0) }}% used
+        <span class="tag" *ngIf="b.percentage >= 100">🚨 Over budget!</span>
+        <span class="tag warn" *ngIf="b.percentage >= 80 && b.percentage < 100">⚠️ Near limit</span>
+      </div>
+    </div>
+
+    <!-- Empty -->
+    <div class="empty-state" *ngIf="budgets.length === 0">
+      <p>📋 No budgets for this month.</p>
+      <p>Tap <strong>+</strong> to set one up!</p>
+    </div>
+  </div>
+
+  <!-- Add Budget Modal -->
+  <div class="modal-overlay" *ngIf="showAddForm" (click)="showAddForm = false">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <h3>Add Budget</h3>
+
+      <div class="form-group">
+        <label>Category</label>
+        <select [(ngModel)]="newBudget.categoryId">
+          <option [value]="0" disabled>Select category...</option>
+          <option *ngFor="let c of categories" [value]="c.id">
+            {{ c.categoryName }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Monthly Limit ($)</label>
+        <input type="number"
+               [(ngModel)]="newBudget.budgetAmount"
+               placeholder="0.00"
+               min="1" />
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-cancel" (click)="showAddForm = false">Cancel</button>
+        <button class="btn-save" (click)="saveBudget()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAB -->
+  <button class="fab" (click)="openAddForm()">+</button>
+
+</div>

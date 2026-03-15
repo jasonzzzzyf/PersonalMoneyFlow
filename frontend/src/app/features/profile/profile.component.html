@@ -1,7 +1,7 @@
-<!-- profile.component.html - 无 Material Icons 版本 -->
+<!-- profile.component.html -->
 
 <div class="profile-container">
-  
+
   <!-- User Info Card -->
   <div class="user-card">
     <div class="avatar">
@@ -15,22 +15,22 @@
   <!-- Settings Section -->
   <div class="section">
     <h3 class="section-title">SETTINGS</h3>
-    
+
     <div class="menu-list">
       <div class="menu-item" (click)="changePassword()">
         <span class="icon">🔒</span>
         <span class="label">Change Password</span>
         <span class="arrow">›</span>
       </div>
-      
+
       <div class="menu-item" (click)="toggleDarkMode()">
         <span class="icon">🌙</span>
         <span class="label">Dark Mode</span>
         <span class="arrow">›</span>
       </div>
-      
+
       <div class="menu-item" (click)="changeCurrency()">
-        <span class="icon">💰</span>
+        <span class="icon">💵</span>
         <span class="label">Currency</span>
         <span class="arrow">›</span>
       </div>
@@ -40,17 +40,48 @@
   <!-- Financial Overview Section -->
   <div class="section">
     <h3 class="section-title">FINANCIAL OVERVIEW</h3>
-    
+
     <div class="menu-list">
-      <div class="menu-item" routerLink="/networth">
-        <span class="icon">💎</span>
-        <span class="label">Net Worth</span>
+      <div class="menu-item" routerLink="/dashboard">
+        <span class="icon">🏠</span>
+        <span class="label">Dashboard</span>
         <span class="arrow">›</span>
       </div>
-      
+
       <div class="menu-item" routerLink="/investments">
+        <span class="icon">💎</span>
+        <span class="label">Investments & Net Worth</span>
+        <span class="arrow">›</span>
+      </div>
+
+      <div class="menu-item" routerLink="/analytics">
         <span class="icon">📊</span>
-        <span class="label">Investment Portfolio</span>
+        <span class="label">Analytics & Charts</span>
+        <span class="arrow">›</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Money Management Section -->
+  <div class="section">
+    <h3 class="section-title">MONEY MANAGEMENT</h3>
+
+    <div class="menu-list">
+      <div class="menu-item" routerLink="/budget">
+        <span class="icon">💰</span>
+        <span class="label">Budget Planner</span>
+        <span class="arrow">›</span>
+      </div>
+
+      <div class="menu-item" routerLink="/recurring">
+        <span class="icon">🔄</span>
+        <span class="label">Recurring Transactions</span>
+        <span class="arrow">›</span>
+      </div>
+
+      <div class="menu-item" routerLink="/reminders">
+        <span class="icon">🔔</span>
+        <span class="label">Bill Reminders</span>
         <span class="arrow">›</span>
       </div>
     </div>
@@ -59,14 +90,14 @@
   <!-- Support Section -->
   <div class="section">
     <h3 class="section-title">SUPPORT</h3>
-    
+
     <div class="menu-list">
       <div class="menu-item" (click)="openHelp()">
         <span class="icon">❓</span>
         <span class="label">Help & FAQ</span>
         <span class="arrow">›</span>
       </div>
-      
+
       <div class="menu-item" (click)="contactSupport()">
         <span class="icon">📧</span>
         <span class="label">Contact Support</span>
