@@ -1,429 +1,125 @@
-# PersonalMoneyManagement 💰
+# Personal Money Flow
 
-A comprehensive personal finance management application inspired by 鲨鱼记账 (Shark Accounting), built with modern full-stack technologies.
+Personal Money Flow is a full-stack personal finance project. It has an Angular frontend, a Spring Boot API, and a small Python service for market data and background jobs.
 
-## 🎯 Project Overview
+The app is still in active development. Core finance flows are in place, but there are still rough edges, missing polish, and some deployment work that needs to be tightened up.
 
-PersonalMoneyManagement is a full-featured finance tracker that helps users manage:
-- ✅ Income & Expense Tracking with customizable categories
-- 📈 Investment Portfolio (stocks, ETFs) with real-time price updates
-- 💎 Net Worth Management (assets & liabilities)
-- 🏦 Loan Calculator with amortization schedules
-- 📅 Calendar View for visual transaction browsing
-- 🤖 AI-powered transaction categorization
+## Features
 
-**Design Philosophy:** Clean, yellow-themed UI inspired by 鲨鱼记账, focusing on simplicity and visual clarity.
+- Track income and expenses with custom categories
+- Manage budgets and reminders
+- View transactions in list and calendar layouts
+- Track investments, assets, loans, and net worth
+- Use a separate Python service for stock data and related background tasks
 
----
+## Tech Stack
 
-## 🛠️ Technology Stack
+- Frontend: Angular 17, TypeScript, Angular Material, SCSS
+- Backend: Spring Boot 3, Java 17, Spring Security, JPA, Maven
+- Data service: FastAPI, Python, Redis integration
+- Database and infra: Flyway migrations, Docker Compose, Render deployment config
 
-### Backend
-- **Framework:** Spring Boot 3.2.1
-- **Language:** Java 17
-- **Database:** MySQL 8.0
-- **Cache:** Redis 7.x
-- **Security:** Spring Security + JWT
-- **ORM:** Spring Data JPA + Hibernate
-- **API Docs:** SpringDoc OpenAPI 3
-- **Build Tool:** Maven
+## Project Structure
 
-### Data Service
-- **Framework:** Python 3.11 + FastAPI
-- **Scraping:** yfinance + BeautifulSoup4
-- **Scheduler:** APScheduler
-- **Cache:** Redis integration
-
-### Frontend
-- **Framework:** Angular 17
-- **Language:** TypeScript 5.x
-- **UI Library:** Angular Material
-- **State Management:** NgRx (planned)
-- **Charts:** Chart.js
-- **Styling:** SCSS with custom yellow theme
-
-### DevOps
-- **Containerization:** Docker + Docker Compose
-- **Database Migration:** Flyway
-- **CI/CD:** GitHub Actions (planned)
-
----
-
-## 📁 Project Structure
-
-```
-PersonalMoneyManagement/
-├── backend/                    # Spring Boot API
-│   ├── src/main/java/com/moneyflow/
-│   │   ├── config/             # Configuration classes
-│   │   ├── controller/         # REST controllers
-│   │   ├── model/
-│   │   │   ├── entity/         # JPA entities
-│   │   │   └── dto/            # Request/Response DTOs
-│   │   ├── repository/         # Spring Data repositories
-│   │   ├── security/           # JWT & security
-│   │   ├── service/            # Business logic
-│   │   └── exception/          # Exception handling
-│   ├── src/main/resources/
-│   │   ├── application.properties
-│   │   └── db/migration/       # Flyway SQL scripts
-│   └── pom.xml
-│
-├── python-service/             # Stock price scraper
-│   ├── app/
-│   │   ├── main.py             # FastAPI app
-│   │   ├── scraper/            # Yahoo Finance scraper
-│   │   └── cache/              # Redis cache
-│   ├── requirements.txt
-│   └── Dockerfile
-│
-├── frontend/                   # Angular SPA
-│   ├── src/app/
-│   │   ├── core/               # Singleton services
-│   │   ├── features/           # Feature modules
-│   │   │   ├── dashboard/
-│   │   │   ├── transactions/
-│   │   │   │   └── calendar-view/  # Key feature!
-│   │   │   ├── investments/
-│   │   │   ├── net-worth/
-│   │   │   └── auth/
-│   │   └── shared/             # Shared components
-│   ├── package.json
-│   └── angular.json
-│
-├── docker-compose.yml          # Multi-container setup
-├── IMPLEMENTATION_GUIDE.md     # Detailed implementation steps
-└── README.md                   # This file
+```text
+backend/            Spring Boot API and database migrations
+frontend/           Angular application
+python-service/     FastAPI service for stock data and async tasks
+database/           Local database-related files and scripts
+docs/               Project notes and supporting docs
+render.yaml         Render deployment config
+docker-compose.yml  Local multi-service setup
 ```
 
----
+## Run Locally
 
-## 🚀 Getting Started
+### 1. Backend
 
-### Prerequisites
-- Java 17+
-- Maven 3.8+
-- Node.js 18+ & npm
-- Python 3.11+
-- MySQL 8.0
-- Redis 7.x
-- Docker & Docker Compose (optional)
-
-### Option 1: Run with Docker Compose (Recommended)
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/PersonalMoneyManagement.git
-cd PersonalMoneyManagement
-
-# Start all services
-docker-compose up -d
-
-# Access the application
-# Frontend: http://localhost:4200
-# Backend API: http://localhost:8080
-# Swagger UI: http://localhost:8080/swagger-ui.html
-# Python API: http://localhost:8000/docs
-```
-
-### Option 2: Run Locally
-
-#### 1. Database Setup
-```bash
-# Install and start MySQL
-mysql -u root -p
-
-# Create database and user
-CREATE DATABASE moneyflow;
-CREATE USER 'moneyflow_user'@'localhost' IDENTIFIED BY 'moneyflow_pass';
-GRANT ALL PRIVILEGES ON moneyflow.* TO 'moneyflow_user'@'localhost';
-FLUSH PRIVILEGES;
-```
-
-#### 2. Start Redis
-```bash
-redis-server
-```
-
-#### 3. Backend
 ```bash
 cd backend
-mvn clean install
 mvn spring-boot:run
-
-# API will be available at http://localhost:8080
 ```
 
-#### 4. Python Service
-```bash
-cd python-service
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+The backend expects database, Redis, and application settings from `application.yml` and any environment-specific overrides.
 
-# API will be available at http://localhost:8000
-```
+### 2. Frontend
 
-#### 5. Frontend
 ```bash
 cd frontend
 npm install
-ng serve
-
-# Application will be available at http://localhost:4200
+npm start
 ```
 
----
+The frontend runs on `http://localhost:4200` by default.
 
-## 📊 Database Schema
+### 3. Python service
 
-The application uses 8 main tables:
-
-1. **users** - User accounts
-2. **custom_categories** - Income/expense categories
-3. **transactions** - Income and expense records
-4. **investments** - Stock/ETF portfolio
-5. **investment_transactions** - Buy/sell history
-6. **assets** - Cash, real estate, vehicles
-7. **loans** - Mortgages, car loans, etc.
-8. **loan_payments** - Payment tracking
-
-All migrations are managed by Flyway in `/backend/src/main/resources/db/migration/`.
-
----
-
-## 🔐 Authentication
-
-The API uses JWT (JSON Web Tokens) for authentication.
-
-### Registration
 ```bash
-POST /api/v1/auth/register
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "password": "SecurePass123",
-  "firstName": "John",
-  "lastName": "Doe",
-  "currencyCode": "CAD"
-}
+cd python-service
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
 ```
 
-### Login
+If you are on macOS or Linux, activate the virtual environment with `source .venv/bin/activate`.
+
+### 4. Optional: run the stack with Docker
+
 ```bash
-POST /api/v1/auth/login
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "password": "SecurePass123"
-}
+docker-compose up --build
 ```
 
-Response includes a JWT token to be used in subsequent requests:
-```json
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "type": "Bearer",
-  "userId": 1,
-  "email": "user@example.com",
-  "firstName": "John",
-  "lastName": "Doe"
-}
-```
+## Testing
 
-### Using the Token
-```bash
-GET /api/v1/transactions
-Authorization: Bearer {token}
-```
+Backend:
 
----
-
-## 📱 Key Features
-
-### 1. Calendar View (Signature Feature)
-- Monthly calendar grid showing daily income/expense
-- Visual color coding (green for income, red for expense)
-- Bottom sheet detail view on day click
-- Week/Month/Year view toggle
-- Inspired by 鲨鱼记账's elegant design
-
-### 2. Investment Portfolio
-- Real-time stock prices via Yahoo Finance
-- Automatic P&L calculation
-- Pie chart allocation visualization
-- Buy/sell transaction history
-
-### 3. Net Worth Tracking
-- Assets (cash, investments, real estate)
-- Liabilities (loans with progress bars)
-- Auto-sync with investment portfolio
-- Historical trend charts
-
-### 4. Loan Calculator
-- Monthly payment calculation
-- Amortization schedule generation
-- Progress visualization
-- Extra payment tracking
-
----
-
-## 🎨 Design System
-
-### Color Palette
-```scss
-$primary-yellow: #F5D547;      // Main brand color
-$primary-yellow-light: #FFF8DC; // Highlights
-$success-green: #4CAF50;        // Income/profit
-$danger-red: #F44336;           // Expense/loss
-$info-blue: #2196F3;            // Information
-```
-
-### Typography
-- Clean, sans-serif fonts
-- Large numbers for key metrics
-- Hierarchical headings
-
-### Layout
-- Card-based design with rounded corners
-- Bottom tab navigation (5 tabs)
-- Yellow floating action button for quick add
-- Mobile-first responsive design
-
----
-
-## 📡 API Endpoints
-
-### Authentication
-- `POST /api/v1/auth/register` - Register new user
-- `POST /api/v1/auth/login` - Login
-- `GET /api/v1/auth/me` - Get current user
-
-### Transactions
-- `GET /api/v1/transactions` - List all (paginated)
-- `POST /api/v1/transactions` - Create transaction
-- `GET /api/v1/transactions/{id}` - Get details
-- `PUT /api/v1/transactions/{id}` - Update
-- `DELETE /api/v1/transactions/{id}` - Delete
-- `GET /api/v1/transactions/calendar?month=2024-12` - Calendar data
-
-### Investments
-- `GET /api/v1/investments/portfolio` - Portfolio summary
-- `POST /api/v1/investments` - Add investment
-- `POST /api/v1/investments/{id}/buy` - Record purchase
-- `POST /api/v1/investments/{id}/sell` - Record sale
-- `GET /api/v1/investments/refresh` - Refresh prices
-
-### Net Worth
-- `GET /api/v1/networth` - Net worth summary
-- `GET /api/v1/assets` - List assets
-- `POST /api/v1/assets` - Add asset
-- `GET /api/v1/loans` - List loans
-- `POST /api/v1/loans` - Add loan
-
-### Stock Prices (Python Service)
-- `GET /api/stocks/{symbol}` - Get current price
-- `GET /api/stocks/batch?symbols=AAPL,GOOGL` - Batch prices
-
-Full API documentation available at `/swagger-ui.html` when backend is running.
-
----
-
-## 🧪 Testing
-
-### Backend Tests
 ```bash
 cd backend
 mvn test
 ```
 
-### Frontend Tests
+Frontend:
+
 ```bash
 cd frontend
-npm test
-npm run e2e  # End-to-end tests
+npm test -- --watch=false --browsers=ChromeHeadless
 ```
 
-### API Testing with Postman
-Import the Postman collection from `/docs/postman_collection.json` (to be added).
+Python service:
 
----
+```bash
+cd python-service
+python -m unittest discover -s tests -v
+```
 
-## 🚧 Development Status
+## Deployment Notes
 
-### ✅ Completed
-- [x] Database schema design
-- [x] Entity models and repositories
-- [x] Security configuration (JWT)
-- [x] Authentication service & controller
-- [x] Category management
-- [x] CORS configuration
-- [x] Project structure
+- `render.yaml` is set up for Render.
+- The frontend builds from `frontend/`.
+- The backend builds from `backend/`.
+- The Python service has its own dependency set and should be deployed separately if used in production.
 
-### ⏳ In Progress
-- [ ] Transaction service & controller
-- [ ] Investment service & controller
-- [ ] Net worth calculation service
-- [ ] Loan calculator service
-- [ ] Python stock scraper
-- [ ] Angular frontend
+Before deploying, double-check environment variables, database connectivity, and Redis availability.
 
-### 📋 Todo
-- [ ] AI categorization integration
-- [ ] Frontend calendar view component
-- [ ] Charts and data visualization
-- [ ] Docker deployment
-- [ ] Unit and integration tests
-- [ ] CI/CD pipeline
-- [ ] Production deployment
+## Current Status
 
----
+Working now:
 
-## 🤝 Contributing
+- Main backend and frontend apps build successfully
+- Basic automated smoke tests are in place
+- Render configuration exists for hosted deployment
 
-This is a portfolio project, but suggestions and feedback are welcome!
+Still needs work:
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+- Broader backend and frontend test coverage
+- Cleanup of some larger frontend stylesheets
+- Better production configuration and environment management
+- More complete end-to-end verification after deploy
 
----
+## Roadmap
 
-## 📝 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
----
-
-## 👤 Author
-
-**Your Name**
-- Portfolio: [yourportfolio.com](https://yourportfolio.com)
-- LinkedIn: [linkedin.com/in/yourprofile](https://linkedin.com/in/yourprofile)
-- Email: your.email@example.com
-
----
-
-## 🙏 Acknowledgments
-
-- Design inspiration from 鲨鱼记账 (Shark Accounting)
-- Stock price data from Yahoo Finance
-- Icons from Material Design Icons
-- Community support from Spring Boot and Angular communities
-
----
-
-## 📚 Additional Documentation
-
-- [Implementation Guide](IMPLEMENTATION_GUIDE.md) - Detailed development steps
-- [API Documentation](http://localhost:8080/swagger-ui.html) - Interactive API docs (when running)
-- [Database Schema](backend/src/main/resources/db/migration/) - Flyway migration scripts
-
----
-
-**Built with ❤️ for demonstrating full-stack Java development skills**
+- Add more feature-level tests
+- Reduce production build warnings
+- Tighten deployment and post-deploy checks
+- Continue improving UX around budgets, investments, and reminders
