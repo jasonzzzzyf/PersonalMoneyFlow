@@ -1,0 +1,31 @@
+services:
+  # Spring Boot backend
+  - type: web
+    name: personalmoneyflow-backend
+    runtime: java
+    buildCommand: cd backend && mvn clean package -DskipTests
+    startCommand: cd backend && java -jar target/*.jar
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false   # Set this to your frontend URL after frontend is deployed
+
+  # Angular frontend (static site)
+  - type: web
+    name: personalmoneyflow-frontend
+    runtime: static
+    buildCommand: cd frontend && npm ci && npm run build -- --configuration production
+    staticPublishPath: frontend/dist/personal-money-management
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
