@@ -1,8 +1,7 @@
 services:
-  # Spring Boot backend
   - type: web
     name: personalmoneyflow-backend
-    runtime: java
+    env: java
     buildCommand: cd backend && mvn clean package -DskipTests
     startCommand: cd backend && java -jar target/*.jar
     envVars:
@@ -13,12 +12,13 @@ services:
       - key: ANTHROPIC_API_KEY
         sync: false
       - key: ALLOWED_ORIGINS
-        sync: false   # Set this to your frontend URL after frontend is deployed
+        sync: false
+      - key: DATABASE_URL
+        sync: false
 
-  # Angular frontend (static site)
   - type: web
     name: personalmoneyflow-frontend
-    runtime: static
+    env: static
     buildCommand: cd frontend && npm ci && npm run build -- --configuration production
     staticPublishPath: frontend/dist/personal-money-management
     headers:
