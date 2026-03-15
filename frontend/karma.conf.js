@@ -17,7 +17,7 @@ module.exports = function (config) {
       suppressAll: true
     },
     coverageReporter: {
-      dir: require('path').join(__dirname, './coverage/personal-money-management'),
+      dir: require('path').join(__dirname, './coverage/personal-money-flow'),
       subdir: '.',
       reporters: [{ type: 'html' }, { type: 'text-summary' }]
     },
