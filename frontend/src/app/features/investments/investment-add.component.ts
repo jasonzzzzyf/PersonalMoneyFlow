@@ -98,7 +98,7 @@ export class InvestmentAddComponent implements OnInit {
       },
       error: (error) => {
         console.error('创建投资失败:', error);
-        this.errorMessage = error.message || '创建投资失败，请重试';
+        this.errorMessage = error.message || 'Failed to create investment. Please try again.';
         this.isSubmitting = false;
       }
     });

@@ -17,16 +17,19 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/categories")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200") // 添加 CORS
 public class CategoryController {
 
     private final CategoryService categoryService;
     private final JwtTokenProvider jwtTokenProvider;
 
     @GetMapping
-    public ResponseEntity<List<CategoryResponse>> getAllCategories(HttpServletRequest request) {
+    public ResponseEntity<List<CategoryResponse>> getAllCategories(
+            @RequestParam(required = false) String type,
+            HttpServletRequest request) {
         Long userId = jwtTokenProvider.getUserIdFromRequest(request);
-        List<CategoryResponse> categories = categoryService.getCategoriesByUser(userId);
+        List<CategoryResponse> categories = (type != null && !type.isBlank())
+                ? categoryService.getCategoriesByUserAndType(userId, type)
+                : categoryService.getCategoriesByUser(userId);
         return ResponseEntity.ok(categories);
     }
 

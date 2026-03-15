@@ -1,34 +1,274 @@
-<!-- investments.component.html - 合并 Portfolio + Net Worth -->
-<div class="investments-container">
-  
-  <!-- Tab Header -->
-  <div class="tab-header">
-    <button 
-      class="tab-button"
-      [class.active]="activeTab === 'portfolio'"
-      (click)="switchTab('portfolio')">
-      <span class="icon">📈</span>
-      <span>Portfolio</span>
-    </button>
-    <button 
-      class="tab-button"
-      [class.active]="activeTab === 'networth'"
-      (click)="switchTab('networth')">
-      <span class="icon">💰</span>
-      <span>Net Worth</span>
-    </button>
+<!-- investments.component.html - Unified Assets Hub -->
+<div class="assets-container">
+
+  <!-- ─── Loading State ──────────────────────────────── -->
+  <div class="loading-screen" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Loading your assets...</p>
   </div>
 
-  <!-- Tab Content -->
-  <div class="tab-content">
-    <!-- Portfolio Tab -->
-    <div *ngIf="activeTab === 'portfolio'" class="portfolio-view">
-      <app-portfolio></app-portfolio>
+  <ng-container *ngIf="!loading">
+
+    <!-- ─── Net Worth Summary Card ─────────────────────── -->
+    <div class="networth-card">
+      <div class="networth-label">Net Worth</div>
+      <div class="networth-amount" [class.positive]="netWorth >= 0" [class.negative]="netWorth < 0">
+        {{ netWorth < 0 ? '-' : '' }}${{ (netWorth < 0 ? -netWorth : netWorth) | number:'1.2-2' }}
+      </div>
+      <div class="networth-breakdown">
+        <div class="breakdown-item">
+          <span class="b-icon">📈</span>
+          <span class="b-label">Invest</span>
+          <span class="b-value">+${{ totalInvestmentValue | number:'1.2-2' }}</span>
+        </div>
+        <div class="breakdown-item">
+          <span class="b-icon">🏦</span>
+          <span class="b-label">Assets</span>
+          <span class="b-value">+${{ totalAssetsValue | number:'1.2-2' }}</span>
+        </div>
+        <div class="breakdown-item">
+          <span class="b-icon">💳</span>
+          <span class="b-label">Debts</span>
+          <span class="b-value red">-${{ totalDebtValue | number:'1.2-2' }}</span>
+        </div>
+      </div>
     </div>
 
-    <!-- Net Worth Tab -->
-    <div *ngIf="activeTab === 'networth'" class="networth-view">
-      <app-networth></app-networth>
+    <!-- ─── Section 1: Investments ─────────────────────── -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">
+          <span class="section-icon">📈</span>
+          <h2>Investments</h2>
+          <span class="badge" *ngIf="investments.length > 0">{{ investments.length }}</span>
+        </div>
+        <div class="section-btns">
+          <button class="btn-icon" (click)="refreshPrices()" [disabled]="refreshingPrices" title="Refresh prices">
+            <span class="material-icons" [class.spinning]="refreshingPrices">refresh</span>
+          </button>
+          <button class="btn-add" (click)="showAddInvestmentModal = true">+ Add</button>
+        </div>
+      </div>
+
+      <div class="section-error" *ngIf="investmentsError">
+        ⚠️ {{ investmentsError }}
+      </div>
+
+      <div class="empty-hint" *ngIf="investments.length === 0 && !investmentsError">
+        <button class="btn-add-first" (click)="showAddInvestmentModal = true">
+          + Add your first investment (Stock / ETF)
+        </button>
+      </div>
+
+      <!-- Investment Cards with P&L indicators -->
+      <div class="investment-list" *ngIf="investments.length > 0">
+        <div class="investment-card" *ngFor="let inv of investments">
+          <div class="inv-header">
+            <div class="inv-symbol-group">
+              <span class="inv-symbol">{{ inv.stockSymbol }}</span>
+              <span class="inv-name">{{ inv.stockName }}</span>
+            </div>
+            <div class="inv-right">
+              <span class="inv-price">${{ inv.currentPrice?.toFixed(2) ?? '—' }}</span>
+              <span class="pnl-badge" [ngClass]="getProfitLossClass(inv.profitLoss || 0)">
+                {{ (inv.profitLoss || 0) >= 0 ? '▲' : '▼' }}
+                {{ inv.profitLossPercent != null ? (inv.profitLossPercent | number:'1.2-2') : '0.00' }}%
+              </span>
+            </div>
+          </div>
+
+          <div class="inv-stats">
+            <div class="inv-stat">
+              <span class="stat-label">Shares</span>
+              <span class="stat-val">{{ inv.totalShares }}</span>
+            </div>
+            <div class="inv-stat">
+              <span class="stat-label">Avg Cost</span>
+              <span class="stat-val">${{ inv.averageCost | number:'1.2-2' }}</span>
+            </div>
+            <div class="inv-stat">
+              <span class="stat-label">Value</span>
+              <span class="stat-val">${{ inv.currentValue != null ? (inv.currentValue | number:'1.2-2') : '—' }}</span>
+            </div>
+            <div class="inv-stat">
+              <span class="stat-label">P&amp;L</span>
+              <span class="stat-val" [ngClass]="getProfitLossClass(inv.profitLoss || 0)">
+                {{ (inv.profitLoss || 0) >= 0 ? '+' : '' }}${{ inv.profitLoss != null ? (inv.profitLoss | number:'1.2-2') : '0.00' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="inv-actions">
+            <button class="btn-trade buy" (click)="openBuyDialog(inv)">Buy</button>
+            <button class="btn-trade sell" (click)="openSellDialog(inv)" [disabled]="inv.totalShares === 0">Sell</button>
+            <button class="btn-trade del" (click)="deleteInvestment(inv)">Delete</button>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
+
+    <!-- ─── Section 2: Assets ──────────────────────────── -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">
+          <span class="section-icon">🏦</span>
+          <h2>Assets</h2>
+          <span class="badge" *ngIf="assets.length > 0">{{ assets.length }}</span>
+        </div>
+        <button class="btn-add" (click)="showAddAssetModal = true">+ Add</button>
+      </div>
+
+      <div class="section-error" *ngIf="assetsError">⚠️ {{ assetsError }}</div>
+
+      <div class="empty-hint" *ngIf="assets.length === 0 && !assetsError">
+        <button class="btn-add-first" (click)="showAddAssetModal = true">
+          + Add an asset (Cash / Real Estate / Vehicle)
+        </button>
+      </div>
+
+      <div class="item-list" *ngIf="assets.length > 0">
+        <div class="item-row" *ngFor="let asset of assets">
+          <span class="row-icon">{{ getAssetIcon(asset.assetType) }}</span>
+          <div class="row-info">
+            <span class="row-name">{{ asset.assetName }}</span>
+            <span class="row-type">{{ formatAssetType(asset.assetType) }}</span>
+          </div>
+          <span class="row-value green">${{ asset.currentValue | number:'1.2-2' }}</span>
+          <button class="btn-del" (click)="deleteAsset(asset)" title="Delete">🗑</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Section 3: Loans ───────────────────────────── -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">
+          <span class="section-icon">🏠</span>
+          <h2>Loans</h2>
+          <span class="badge" *ngIf="structuredLoans.length > 0">{{ structuredLoans.length }}</span>
+        </div>
+        <button class="btn-add" (click)="showAddLoanModal = true">+ Add</button>
+      </div>
+
+      <div class="section-error" *ngIf="loansError">⚠️ {{ loansError }}</div>
+
+      <div class="empty-hint" *ngIf="structuredLoans.length === 0 && !loansError">
+        <button class="btn-add-first" (click)="showAddLoanModal = true">
+          + Add a loan (Mortgage / Car / Student)
+        </button>
+      </div>
+
+      <div class="item-list" *ngIf="structuredLoans.length > 0">
+        <div class="loan-row" *ngFor="let loan of structuredLoans">
+          <div class="loan-main">
+            <span class="row-icon">{{ getLoanIcon(loan.loanType) }}</span>
+            <div class="row-info">
+              <span class="row-name">{{ loan.loanName }}</span>
+              <span class="row-type">{{ formatLoanType(loan.loanType) }}</span>
+            </div>
+            <span class="row-value red">-${{ loan.remainingBalance | number:'1.2-2' }}</span>
+            <button class="btn-del" (click)="deleteLoan(loan)" title="Delete">🗑</button>
+          </div>
+          <div class="loan-progress">
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="getLoanProgress(loan)"></div>
+            </div>
+            <span class="progress-text">{{ getLoanProgress(loan) }}% paid · ${{ loan.monthlyPayment | number:'1.2-2' }}/mo</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Section 4: Liabilities ─────────────────────── -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">
+          <span class="section-icon">💳</span>
+          <h2>Liabilities</h2>
+          <span class="badge" *ngIf="liabilities.length > 0">{{ liabilities.length }}</span>
+        </div>
+        <button class="btn-add" (click)="showAddLiabilityModal = true">+ Add</button>
+      </div>
+
+      <div class="empty-hint" *ngIf="liabilities.length === 0 && !loansError">
+        <button class="btn-add-first" (click)="showAddLiabilityModal = true">
+          + Add a liability (Personal Loan / Other debt)
+        </button>
+      </div>
+
+      <div class="item-list" *ngIf="liabilities.length > 0">
+        <div class="item-row" *ngFor="let loan of liabilities">
+          <span class="row-icon">{{ getLoanIcon(loan.loanType) }}</span>
+          <div class="row-info">
+            <span class="row-name">{{ loan.loanName }}</span>
+            <span class="row-type">{{ formatLoanType(loan.loanType) }}</span>
+          </div>
+          <span class="row-value red">-${{ loan.remainingBalance | number:'1.2-2' }}</span>
+          <button class="btn-del" (click)="deleteLoan(loan)" title="Delete">🗑</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Section 5: AI Loan Scanner ──────────────────── -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">
+          <span class="section-icon">🤖</span>
+          <h2>AI Loan Scanner</h2>
+        </div>
+      </div>
+      <div class="scanner-wrapper">
+        <app-loan-scanner></app-loan-scanner>
+      </div>
+    </div>
+
+    <!-- Bottom spacer for nav bar -->
+    <div class="nav-spacer"></div>
+
+  </ng-container>
 </div>
+
+<!-- ─── Modals ──────────────────────────────────────────── -->
+
+<!-- Add Investment -->
+<div class="modal-overlay" *ngIf="showAddInvestmentModal" (click)="showAddInvestmentModal = false"></div>
+<div class="modal-float" *ngIf="showAddInvestmentModal" (click)="$event.stopPropagation()">
+  <app-add-investment-dialog
+    (added)="onInvestmentAdded()"
+    (cancelled)="showAddInvestmentModal = false">
+  </app-add-investment-dialog>
+</div>
+
+<!-- Buy / Sell Transaction -->
+<div class="modal-overlay" *ngIf="showTransactionModal" (click)="showTransactionModal = false"></div>
+<div class="modal-float" *ngIf="showTransactionModal" (click)="$event.stopPropagation()">
+  <app-transaction-dialog
+    [investment]="selectedInvestment!"
+    [transactionType]="transactionType"
+    (completed)="onTransactionCompleted()"
+    (cancelled)="showTransactionModal = false">
+  </app-transaction-dialog>
+</div>
+
+<!-- Add Asset Modal -->
+<app-add-asset-modal
+  *ngIf="showAddAssetModal"
+  (close)="showAddAssetModal = false"
+  (assetCreated)="onAssetCreated($event)">
+</app-add-asset-modal>
+
+<!-- Add Loan Modal — shows Mortgage / Car / Student -->
+<app-add-loan-modal
+  *ngIf="showAddLoanModal"
+  mode="loan"
+  (close)="showAddLoanModal = false"
+  (loanCreated)="onLoanCreated($event)">
+</app-add-loan-modal>
+
+<!-- Add Liability Modal — shows Personal Loan / Other -->
+<app-add-loan-modal
+  *ngIf="showAddLiabilityModal"
+  mode="liability"
+  (close)="showAddLiabilityModal = false"
+  (loanCreated)="onLoanCreated($event)">
+</app-add-loan-modal>

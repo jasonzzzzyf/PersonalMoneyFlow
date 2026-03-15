@@ -170,7 +170,7 @@
   background: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: flex-end;
-  z-index: 200;
+  z-index: 1001;
 }
 
 .modal-card {
@@ -178,8 +178,19 @@
   border-radius: 20px 20px 0 0;
   padding: 24px;
   width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
 
   h3 { margin: 0 0 20px 0; font-size: 18px; font-weight: 700; }
+
+  .modal-error {
+    background: #FFEBEE;
+    color: #c62828;
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 14px;
+    font-size: 13px;
+  }
 
   .form-group {
     margin-bottom: 16px;
@@ -227,6 +238,7 @@
     .btn-save {
       background: linear-gradient(135deg, #F5D547, #E6C63D);
       color: #333;
+      &:disabled { opacity: 0.6; cursor: not-allowed; }
     }
   }
 }

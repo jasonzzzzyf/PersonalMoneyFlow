@@ -76,7 +76,7 @@ export class TransactionListComponent implements OnInit {
       },
       error: (error) => {
         console.error('Transaction List: 加载交易失败:', error);
-        this.errorMessage = '无法加载交易列表，请检查网络连接';
+        this.errorMessage = 'Failed to load transactions. Please check your connection.';
         this.isLoading = false;
       }
     });

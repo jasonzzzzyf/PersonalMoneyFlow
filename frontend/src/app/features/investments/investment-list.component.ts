@@ -39,7 +39,7 @@ export class InvestmentListComponent implements OnInit {
       },
       error: (error) => {
         console.error('加载投资组合失败:', error);
-        this.errorMessage = '无法加载投资组合';
+        this.errorMessage = 'Failed to load portfolio.';
         this.isLoading = false;
       }
     });

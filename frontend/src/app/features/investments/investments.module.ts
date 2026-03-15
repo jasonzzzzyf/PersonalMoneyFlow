@@ -3,15 +3,14 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-// Main component with tabs
+// Main unified Assets Hub component
 import { InvestmentsComponent } from './investments.component';
 
-// Portfolio components
-import { PortfolioComponent } from './portfolio/portfolio.component';
+// Sub-dialogs used by the hub
 import { AddInvestmentDialogComponent } from './add-investment-dialog/add-investment-dialog.component';
 import { TransactionDialogComponent } from './transaction-dialog/transaction-dialog.component';
 
-// Import NetWorth module
+// NetWorthModule exports AddAssetModalComponent, AddLoanModalComponent, NetWorthComponent
 import { NetWorthModule } from '../networth/networth.module';
 
 const routes: Routes = [
@@ -24,7 +23,6 @@ const routes: Routes = [
 @NgModule({
   declarations: [
     InvestmentsComponent,
-    PortfolioComponent,
     AddInvestmentDialogComponent,
     TransactionDialogComponent
   ],
@@ -32,7 +30,7 @@ const routes: Routes = [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    NetWorthModule,  // Import NetWorth module
+    NetWorthModule,           // Provides AddAssetModal, AddLoanModal
     RouterModule.forChild(routes)
   ]
 })

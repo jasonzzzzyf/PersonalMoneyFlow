@@ -76,10 +76,25 @@ export class RecurringComponent implements OnInit {
   }
 
   saveItem(): void {
-    if (!this.newItem.description || !this.newItem.amount || !this.newItem.categoryId) return;
-    this.recurringService.create(this.newItem).subscribe({
+    const categoryId = Number(this.newItem.categoryId);
+    const amount = Number(this.newItem.amount);
+    if (!this.newItem.description?.trim()) {
+      this.error = 'Please enter a description.';
+      return;
+    }
+    if (!categoryId) {
+      this.error = 'Please select a category.';
+      return;
+    }
+    if (!amount || amount <= 0) {
+      this.error = 'Please enter an amount greater than 0.';
+      return;
+    }
+    const payload: RecurringRequest = { ...this.newItem, categoryId, amount };
+    this.recurringService.create(payload).subscribe({
       next: () => {
         this.showAddForm = false;
+        this.error = '';
         this.loadAll();
       },
       error: (err) => {

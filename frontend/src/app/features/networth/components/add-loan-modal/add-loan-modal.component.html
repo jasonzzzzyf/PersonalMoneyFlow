@@ -4,7 +4,7 @@
   <div class="modal-content large" (click)="$event.stopPropagation()">
     
     <div class="modal-header">
-      <h2>Add Loan</h2>
+      <h2>{{ modalTitle }}</h2>
       <button class="close-btn" (click)="closeModal()">✕</button>
     </div>
 
@@ -130,7 +130,7 @@
           type="submit" 
           class="btn btn-submit"
           [disabled]="saving">
-          {{ saving ? 'Saving...' : 'Add Loan' }}
+          {{ saving ? 'Saving...' : submitLabel }}
         </button>
       </div>
 

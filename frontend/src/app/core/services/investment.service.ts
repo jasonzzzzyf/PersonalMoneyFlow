@@ -4,13 +4,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class InvestmentService {
 
-  private readonly API_URL = 'http://localhost:8080/api/v1';
+  private readonly API_URL = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
@@ -27,19 +28,23 @@ export class InvestmentService {
     });
   }
 
-  // 记录买入
+  // 记录买入 — transactionType + transactionDate are required by the backend DTO
   recordBuy(investmentId: number, shares: number, pricePerShare: number): Observable<any> {
     return this.http.post(`${this.API_URL}/investments/${investmentId}/buy`, {
+      transactionType: 'BUY',
       shares,
-      pricePerShare
+      pricePerShare,
+      transactionDate: new Date().toISOString().split('T')[0]   // today, e.g. "2025-03-09"
     });
   }
 
-  // 记录卖出
+  // 记录卖出 — transactionType + transactionDate are required by the backend DTO
   recordSell(investmentId: number, shares: number, pricePerShare: number): Observable<any> {
     return this.http.post(`${this.API_URL}/investments/${investmentId}/sell`, {
+      transactionType: 'SELL',
       shares,
-      pricePerShare
+      pricePerShare,
+      transactionDate: new Date().toISOString().split('T')[0]
     });
   }
 

@@ -27,6 +27,13 @@ public class CategoryService {
                 .collect(Collectors.toList());
     }
 
+    public List<CategoryResponse> getCategoriesByUserAndType(Long userId, String type) {
+        List<CustomCategory> categories = categoryRepository.findByUserIdAndCategoryType(userId, type.toUpperCase());
+        return categories.stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
     public CategoryResponse getCategoryById(Long userId, Long categoryId) {
         CustomCategory category = categoryRepository.findByIdAndUserId(categoryId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));

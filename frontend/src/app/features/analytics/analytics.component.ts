@@ -47,7 +47,7 @@ export class AnalyticsComponent implements OnInit {
       legend: { display: true, position: 'top' },
       tooltip: {
         callbacks: {
-          label: (ctx) => ` ${ctx.dataset.label}: $${ctx.parsed.y.toLocaleString()}`
+          label: (ctx) => ` ${ctx.dataset.label}: $${(ctx.parsed.y ?? 0).toLocaleString()}`
         }
       }
     },
@@ -113,7 +113,7 @@ export class AnalyticsComponent implements OnInit {
       legend: { display: false },
       tooltip: {
         callbacks: {
-          label: (ctx) => ` Spent: $${ctx.parsed.y.toLocaleString()}`
+          label: (ctx) => ` Spent: $${(ctx.parsed.y ?? 0).toLocaleString()}`
         }
       }
     },

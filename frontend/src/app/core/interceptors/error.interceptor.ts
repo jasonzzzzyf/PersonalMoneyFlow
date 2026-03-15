@@ -24,32 +24,30 @@ export class ErrorInterceptor implements HttpInterceptor {
 
         if (error.error instanceof ErrorEvent) {
           // 客户端错误
-          errorMessage = `客户端错误: ${error.error.message}`;
+          errorMessage = `Client error: ${error.error.message}`;
         } else {
-          // 服务器错误
           switch (error.status) {
             case 401:
-              // 未授权 - 清除 token 并跳转到登录页
               localStorage.removeItem(environment.tokenKey);
               localStorage.removeItem(environment.userKey);
               this.router.navigate(['/auth/login']);
-              errorMessage = '登录已过期，请重新登录';
+              errorMessage = 'Session expired. Please log in again.';
               break;
-            
+
             case 403:
-              errorMessage = '没有权限访问此资源';
+              errorMessage = 'You do not have permission to access this resource.';
               break;
-            
+
             case 404:
-              errorMessage = '请求的资源不存在';
+              errorMessage = 'The requested resource was not found.';
               break;
-            
+
             case 500:
-              errorMessage = '服务器内部错误';
+              errorMessage = 'Internal server error. Please try again later.';
               break;
-            
+
             default:
-              errorMessage = error.error?.message || error.message || '未知错误';
+              errorMessage = error.error?.message || error.message || 'An unknown error occurred.';
           }
         }
 

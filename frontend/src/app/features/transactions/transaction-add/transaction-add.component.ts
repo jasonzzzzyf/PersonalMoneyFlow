@@ -84,12 +84,12 @@ export class TransactionAddComponent implements OnInit {
         
         // 如果没有分类，显示提示
         if (this.categories.length === 0) {
-          this.errorMessage = '暂无分类，请先联系管理员添加分类';
+          this.errorMessage = 'No categories found. Please add a category first.';
         }
       },
       error: (error) => {
         console.error('加载分类失败:', error);
-        this.errorMessage = '无法加载分类列表，请检查网络连接或后端服务';
+        this.errorMessage = 'Failed to load categories. Please check your connection or restart the backend.';
       }
     });
   }
@@ -151,7 +151,7 @@ export class TransactionAddComponent implements OnInit {
     this.transactionService.createTransaction(transaction).subscribe({
       next: (response) => {
         console.log('交易创建成功:', response);
-        this.successMessage = '交易添加成功！';
+        this.successMessage = 'Transaction added successfully!';
         
         // 延迟跳转，让用户看到成功消息
         setTimeout(() => {
@@ -162,7 +162,7 @@ export class TransactionAddComponent implements OnInit {
       },
       error: (error) => {
         console.error('创建交易失败:', error);
-        this.errorMessage = error.message || '创建交易失败，请重试';
+        this.errorMessage = error.message || 'Failed to create transaction. Please try again.';
         this.isSubmitting = false;
       }
     });

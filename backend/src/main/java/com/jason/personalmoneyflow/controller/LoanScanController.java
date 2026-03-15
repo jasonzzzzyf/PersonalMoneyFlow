@@ -13,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/v1/loans")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200")
 public class LoanScanController {
 
     private final LoanScanService loanScanService;

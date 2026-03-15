@@ -3,6 +3,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface Asset {
   id?: number;
@@ -37,7 +38,7 @@ export interface Loan {
 })
 export class NetWorthService {
 
-  private readonly API_URL = 'http://localhost:8080/api/v1';
+  private readonly API_URL = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 

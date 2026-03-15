@@ -18,7 +18,6 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping("/api/v1/networth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class NetWorthController {
 
     private final NetWorthService netWorthService;
