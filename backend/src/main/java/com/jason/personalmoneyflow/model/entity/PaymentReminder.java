@@ -34,7 +34,7 @@ public class PaymentReminder {
     @Column(name = "reminder_name", nullable = false, length = 255)
     private String reminderName;
 
-    @Column(nullable = false, precision = 15, scale = 2)
+    @Column(precision = 15, scale = 2)
     private BigDecimal amount;
 
     @Column(name = "category_id")

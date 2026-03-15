@@ -15,6 +15,8 @@ export class BudgetComponent implements OnInit {
   error = '';
 
   showAddForm = false;
+  saving = false;
+  modalError = '';
   selectedYear = new Date().getFullYear();
   selectedMonth = new Date().getMonth() + 1;
 
@@ -94,18 +96,43 @@ export class BudgetComponent implements OnInit {
       month: `${this.selectedYear}-${m}-01`,
       budgetAmount: 0
     };
+    this.modalError = '';
+    this.saving = false;
     this.showAddForm = true;
   }
 
   saveBudget(): void {
-    if (!this.newBudget.categoryId || !this.newBudget.budgetAmount) return;
-    this.budgetService.createBudget(this.newBudget).subscribe({
+    // Coerce to numbers in case [ngValue] still returns a string in some edge case
+    const categoryId = Number(this.newBudget.categoryId);
+    const budgetAmount = Number(this.newBudget.budgetAmount);
+
+    if (!categoryId) {
+      this.modalError = 'Please select a category.';
+      return;
+    }
+    if (!budgetAmount || budgetAmount <= 0) {
+      this.modalError = 'Please enter a budget amount greater than 0.';
+      return;
+    }
+
+    this.saving = true;
+    this.modalError = '';
+
+    const payload: BudgetRequest = {
+      categoryId,
+      month: this.newBudget.month,
+      budgetAmount
+    };
+
+    this.budgetService.createBudget(payload).subscribe({
       next: () => {
+        this.saving = false;
         this.showAddForm = false;
         this.loadBudgets();
       },
       error: (err) => {
-        this.error = err.error?.message || 'Failed to create budget';
+        this.saving = false;
+        this.modalError = err.error?.message || err.message || 'Failed to create budget. Please try again.';
       }
     });
   }

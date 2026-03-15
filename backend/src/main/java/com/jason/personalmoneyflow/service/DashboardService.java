@@ -54,7 +54,7 @@ public class DashboardService {
         }
 
         // Recent transactions (most recent 5)
-        List<TransactionResponse> recent = transactionService.getTransactions(userId);
+        List<TransactionResponse> recent = transactionService.getTransactions(userId, null, null);
         if (recent.size() > 5) {
             recent = recent.subList(0, 5);
         }

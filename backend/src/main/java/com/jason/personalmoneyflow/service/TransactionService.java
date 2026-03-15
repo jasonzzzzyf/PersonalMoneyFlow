@@ -34,7 +34,10 @@ public class TransactionService {
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found or doesn't belong to user"));
 
         Transaction.TransactionType transactionType =
-                Transaction.TransactionType.valueOf(request.getType());
+                Transaction.TransactionType.valueOf(request.getTransactionType());
+
+        // Use notes or fall back to description
+        String noteText = request.getNotes() != null ? request.getNotes() : request.getDescription();
 
         Transaction transaction = Transaction.builder()
                 .userId(userId)
@@ -42,15 +45,20 @@ public class TransactionService {
                 .categoryId(request.getCategoryId())
                 .amount(request.getAmount())
                 .transactionDate(request.getTransactionDate())
-                .notes(request.getNote())
+                .notes(noteText)
                 .build();
 
         Transaction saved = transactionRepository.save(transaction);
         return mapToResponse(saved, category);
     }
 
-    public List<TransactionResponse> getTransactions(Long userId) {
-        List<Transaction> transactions = transactionRepository.findByUserIdOrderByTransactionDateDesc(userId);
+    public List<TransactionResponse> getTransactions(Long userId, LocalDate startDate, LocalDate endDate) {
+        List<Transaction> transactions;
+        if (startDate != null && endDate != null) {
+            transactions = transactionRepository.findTransactionsInRange(userId, startDate, endDate);
+        } else {
+            transactions = transactionRepository.findByUserIdOrderByTransactionDateDesc(userId);
+        }
         Set<Long> categoryIds = transactions.stream()
                 .map(Transaction::getCategoryId)
                 .collect(Collectors.toSet());
@@ -142,8 +150,8 @@ public class TransactionService {
         return TransactionResponse.builder()
                 .id(transaction.getId())
                 .amount(transaction.getAmount())
-                .type(transaction.getTransactionType() != null ? transaction.getTransactionType().name() : null)
-                .note(transaction.getNotes())
+                .transactionType(transaction.getTransactionType() != null ? transaction.getTransactionType().name() : null)
+                .notes(transaction.getNotes())
                 .transactionDate(transaction.getTransactionDate())
                 .categoryId(transaction.getCategoryId())
                 .categoryName(category != null ? category.getCategoryName() : null)

@@ -24,7 +24,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/investments")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class InvestmentController {
 
     private final InvestmentService investmentService;

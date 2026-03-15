@@ -23,7 +23,7 @@ public class TransactionRequest {
 
     @NotBlank(message = "Transaction type is required")
     @Pattern(regexp = "INCOME|EXPENSE", message = "Type must be INCOME or EXPENSE")
-    private String type;
+    private String transactionType;
 
     @NotNull(message = "Category ID is required")
     private Long categoryId;
@@ -32,7 +32,10 @@ public class TransactionRequest {
     private LocalDate transactionDate;
 
     @Size(max = 500)
-    private String note;
+    private String notes;
+
+    @Size(max = 500)
+    private String description;
 
     private Boolean isRecurring = false;
 

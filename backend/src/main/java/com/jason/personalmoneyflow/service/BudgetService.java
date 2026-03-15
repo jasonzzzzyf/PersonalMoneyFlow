@@ -54,17 +54,12 @@ public class BudgetService {
         CustomCategory category = categoryRepository.findByIdAndUserId(request.getCategoryId(), userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
-        // Pre-calculate spent amount from existing transactions
-        BigDecimal spent = transactionRepository.getTotalExpense(
-                userId, monthStart, monthStart.withDayOfMonth(monthStart.lengthOfMonth())
-        );
-
         Budget budget = Budget.builder()
                 .userId(userId)
                 .categoryId(request.getCategoryId())
                 .month(monthStart)
                 .budgetAmount(request.getBudgetAmount())
-                .spentAmount(spent != null ? spent : BigDecimal.ZERO)
+                .spentAmount(BigDecimal.ZERO)
                 .build();
 
         Budget saved = budgetRepository.save(budget);

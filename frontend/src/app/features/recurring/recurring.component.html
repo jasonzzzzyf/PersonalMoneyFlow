@@ -100,8 +100,8 @@
       <div class="form-group">
         <label>Category</label>
         <select [(ngModel)]="newItem.categoryId">
-          <option [value]="0" disabled>Select...</option>
-          <option *ngFor="let c of categories" [value]="c.id">{{ c.categoryName }}</option>
+          <option [ngValue]="0" disabled>Select...</option>
+          <option *ngFor="let c of categories" [ngValue]="c.id">{{ c.categoryName }}</option>
         </select>
       </div>
 

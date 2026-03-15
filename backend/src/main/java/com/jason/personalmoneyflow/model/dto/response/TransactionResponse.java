@@ -17,8 +17,8 @@ public class TransactionResponse {
 
     private Long id;
     private BigDecimal amount;
-    private String type;
-    private String note;
+    private String transactionType;
+    private String notes;
     private LocalDate transactionDate;
     private Long categoryId;
     private String categoryName;

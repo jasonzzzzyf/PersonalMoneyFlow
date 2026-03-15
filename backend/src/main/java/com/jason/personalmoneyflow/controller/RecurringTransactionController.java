@@ -16,7 +16,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/recurring")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200")
 public class RecurringTransactionController {
 
     private final RecurringTransactionService recurringService;

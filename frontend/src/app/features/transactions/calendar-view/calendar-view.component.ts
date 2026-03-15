@@ -141,7 +141,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Calendar View: 加载失败:', error);
-        this.errorMessage = '无法加载月份数据';
+        this.errorMessage = 'Failed to load calendar data.';
         this.generateCalendar([]);
         this.isLoading = false;
       }

@@ -16,7 +16,7 @@ public class PaymentReminderRequest {
     @Size(max = 255)
     private String reminderName;
 
-    @NotNull
+    /** Optional — user may not know the exact amount yet */
     @Positive
     private BigDecimal amount;
 

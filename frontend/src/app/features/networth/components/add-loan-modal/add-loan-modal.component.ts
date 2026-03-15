@@ -1,6 +1,6 @@
 // add-loan-modal.component.ts - 修复版
 
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NetWorthService, Loan } from '../../../../core/services/networth.service';
 
@@ -9,7 +9,10 @@ import { NetWorthService, Loan } from '../../../../core/services/networth.servic
   templateUrl: './add-loan-modal.component.html',
   styleUrls: ['./add-loan-modal.component.scss']
 })
-export class AddLoanModalComponent {
+export class AddLoanModalComponent implements OnInit {
+
+  /** 'loan' = Mortgage / Car / Student  |  'liability' = Personal / Other */
+  @Input() mode: 'loan' | 'liability' = 'loan';
 
   @Output() close = new EventEmitter<void>();
   @Output() loanCreated = new EventEmitter<Loan>();
@@ -19,13 +22,37 @@ export class AddLoanModalComponent {
   saving = false;
   calculatedPayment = 0;
 
-  loanTypes = [
-    { value: 'MORTGAGE', label: 'Mortgage', icon: '🏠', description: 'Home loan' },
-    { value: 'CAR_LOAN', label: 'Car Loan', icon: '🚗', description: 'Vehicle financing' },
-    { value: 'STUDENT_LOAN', label: 'Student Loan', icon: '🎓', description: 'Education loan' },
-    { value: 'PERSONAL_LOAN', label: 'Personal Loan', icon: '💳', description: 'Personal credit' },
-    { value: 'OTHER', label: 'Other', icon: '📄', description: 'Other loans' }
+  // All types — filtered by mode in ngOnInit
+  private allLoanTypes = [
+    { value: 'MORTGAGE',      label: 'Mortgage',      icon: '🏠', description: 'Home loan' },
+    { value: 'CAR_LOAN',      label: 'Car Loan',       icon: '🚗', description: 'Vehicle financing' },
+    { value: 'STUDENT_LOAN',  label: 'Student Loan',   icon: '🎓', description: 'Education loan' },
+    { value: 'PERSONAL_LOAN', label: 'Personal Loan',  icon: '💳', description: 'Personal credit' },
+    { value: 'OTHER',         label: 'Other',          icon: '📄', description: 'Other debt' }
   ];
+
+  loanTypes: typeof this.allLoanTypes = [];
+
+  get modalTitle(): string {
+    return this.mode === 'liability' ? 'Add Liability' : 'Add Loan';
+  }
+
+  get submitLabel(): string {
+    return this.mode === 'liability' ? 'Add Liability' : 'Add Loan';
+  }
+
+  ngOnInit(): void {
+    // Filter types based on mode
+    if (this.mode === 'liability') {
+      this.loanTypes = this.allLoanTypes.filter(t =>
+        ['PERSONAL_LOAN', 'OTHER'].includes(t.value)
+      );
+    } else {
+      this.loanTypes = this.allLoanTypes.filter(t =>
+        ['MORTGAGE', 'CAR_LOAN', 'STUDENT_LOAN'].includes(t.value)
+      );
+    }
+  }
 
   constructor(
     private fb: FormBuilder,
