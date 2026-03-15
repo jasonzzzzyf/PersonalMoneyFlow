@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(ls -la \"D:\\\\code\\\\PersonalMoneyFlow\\\\.claude\\\\worktrees\\\\dazzling-lehmann\\\\frontend\\\\src\"\" | grep -E \"styles)",
-      "Bash(scss \")"
-    ]
-  }
-}
