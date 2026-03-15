@@ -19,7 +19,7 @@ services:
     name: personalmoneyflow-frontend
     env: static
     buildCommand: cd frontend && npm ci && npm run build -- --configuration production
-    staticPublishPath: frontend/dist/personal-money-management
+    staticPublishPath: frontend/dist/personal-money-flow
     headers:
       - path: /*
         name: Cache-Control
